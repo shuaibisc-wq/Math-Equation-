@@ -5,54 +5,51 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theorem of Love | Prova</title>
     <style>
-        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #030303; font-family: 'Georgia', serif; }
+        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
-        #bgCanvas { z-index: 1; } 
+        #bgCanvas { z-index: 1; opacity: 0.4; } 
         #heartCanvas { z-index: 5; }
 
         /* Cover Page */
         #cover-page {
             position: fixed; z-index: 20; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: radial-gradient(circle, rgba(20,20,20,0.9) 0%, rgba(5,5,5,1) 100%); 
-            color: white; transition: opacity 1.5s;
+            background: #000; color: white; transition: opacity 1.5s;
         }
 
-        h1 { font-size: 2.8rem; letter-spacing: 12px; margin-bottom: 50px; font-style: italic; text-align: center; font-weight: 300; }
+        h1 { font-size: 2.8rem; letter-spacing: 12px; margin-bottom: 50px; font-style: italic; font-weight: 300; }
         
         .btn {
-            padding: 18px 60px; border: 1px solid rgba(255,255,255,0.5); background: none;
+            padding: 18px 60px; border: 1px solid #fff; background: none;
             color: white; cursor: pointer; font-family: 'Courier New', monospace;
-            border-radius: 50px; transition: 0.5s; letter-spacing: 4px;
+            border-radius: 2px; transition: 0.5s; letter-spacing: 4px;
         }
-        .btn:hover { background: white; color: black; box-shadow: 0 0 40px rgba(255,255,255,0.6); transform: scale(1.05); }
+        .btn:hover { background: white; color: black; box-shadow: 0 0 40px #fff; }
 
-        /* Loading Screen - Widened Bar */
+        /* Loading Screen */
         #loading-screen {
             position: fixed; z-index: 30; width: 100%; height: 100%;
-            background: #050505; display: none; flex-direction: column;
+            background: #000; display: none; flex-direction: column;
             justify-content: center; align-items: center; color: #fff;
         }
+        .loading-text { font-family: 'Courier New'; letter-spacing: 6px; font-size: 14px; margin-bottom: 10px; }
+        .percent-text { font-family: 'Courier New'; font-size: 18px; margin-bottom: 20px; color: #fff; }
+        
         .bar-container { 
-            width: 500px; /* WIDENED BAR */
+            width: 600px; /* Wide and Gorgeous */
             height: 2px; 
             background: rgba(255,255,255,0.1); 
-            margin-top: 30px; 
             border-radius: 10px;
-            overflow: hidden;
         }
-        .bar { width: 0%; height: 100%; background: #ff2d55; box-shadow: 0 0 20px #ff2d55; transition: width 0.1s; }
+        .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 20px #fff; }
 
         /* Final Message */
         #final-msg {
             position: fixed; z-index: 40; width: 100%; text-align: center;
             top: 50%; transform: translateY(-50%); color: white;
             font-size: 3.5rem; font-style: italic; opacity: 0; 
-            transition: opacity 4s ease-in-out; text-shadow: 0 0 30px #ff1493; pointer-events: none;
+            transition: opacity 4s ease-in-out; text-shadow: 0 0 30px #fff; pointer-events: none;
         }
-        
-        .loading-text { font-family: 'Courier New'; letter-spacing: 6px; font-size: 14px; color: #ff2d55; animation: blink 1s infinite; }
-        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -66,7 +63,8 @@
     </div>
 
     <div id="loading-screen">
-        <div class="loading-text">SOLVING COMPLEX IDENTITIES...</div>
+        <div class="loading-text">SOLVING COMPLEX IDENTITIES</div>
+        <div class="percent-text" id="percent">0%</div>
         <div class="bar-container"><div class="bar" id="progressBar"></div></div>
     </div>
 
@@ -82,8 +80,7 @@
         const equations = [
             "Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "∫e^-x² dx = √π",
             "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "P(A|B) = P(B|A)P(A)/P(B)",
-            "L = T - V", "E = mc²", "ΔxΔp ≥ ℏ/2", "d/dx[sin x] = cos x",
-            "G_μν + Λg_μν = κT_μν", "∮E·dA = Q/ε₀"
+            "L = T - V", "E = mc²", "ΔxΔp ≥ ℏ/2", "d/dx[sin x] = cos x", "G_μν + Λg_μν = κT_μν"
         ];
         let parts = [];
 
@@ -101,10 +98,10 @@
                 this.y = h + 20;
                 this.txt = equations[Math.floor(Math.random() * equations.length)];
                 this.speed = 0.4 + Math.random() * 0.8;
-                this.alpha = 0.2 + Math.random() * 0.5;
+                this.alpha = 0.2 + Math.random() * 0.6;
             }
             draw() {
-                ctxB.font = "15px 'Courier New'";
+                ctxB.font = "14px 'Courier New'";
                 ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
                 ctxB.fillText(this.txt, this.x, this.y);
                 this.y -= this.speed;
@@ -121,18 +118,15 @@
         animateBg();
 
         function drawCoordinates() {
-            ctxH.setLineDash([5, 15]); // Charming dashed lines
-            ctxH.strokeStyle = "rgba(255, 255, 255, 0.15)";
+            ctxH.strokeStyle = "rgba(255, 255, 255, 0.2)";
             ctxH.lineWidth = 1;
-            
             ctxH.beginPath(); ctxH.moveTo(0, h/2); ctxH.lineTo(w, h/2); ctxH.stroke();
             ctxH.beginPath(); ctxH.moveTo(w/2, 0); ctxH.lineTo(w/2, h); ctxH.stroke();
             
-            ctxH.setLineDash([]); // Reset
             ctxH.fillStyle = "rgba(255, 255, 255, 0.4)";
             ctxH.font = "italic 12px Georgia";
-            ctxH.fillText("Time Complexity", w - 120, h/2 - 15);
-            ctxH.fillText("Affection Magnitude", w/2 + 20, 30);
+            ctxH.fillText("T-Axis", w - 60, h/2 - 10);
+            ctxH.fillText("A-Axis", w/2 + 15, 25);
         }
 
         function initiate() {
@@ -145,17 +139,19 @@
 
         function startLoad() {
             const bar = document.getElementById('progressBar');
+            const percent = document.getElementById('percent');
             document.getElementById('loading-screen').style.display = 'flex';
             let p = 0;
             const iv = setInterval(() => {
                 p += 0.4;
                 bar.style.width = p + '%';
+                percent.innerText = Math.floor(p) + "%";
                 if (p >= 100) {
                     clearInterval(iv);
                     document.getElementById('loading-screen').style.display = 'none';
                     startHeart();
                 }
-            }, 20); // Smooth 5s load
+            }, 20); // 5 Seconds
         }
 
         function startHeart() {
@@ -165,7 +161,6 @@
                 if (t <= 2 * Math.PI) {
                     let x = 16 * Math.pow(Math.sin(t), 3);
                     let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                    
                     const s = Math.min(w, h) / 45;
                     const cx = w/2 + x * s;
                     const cy = h/2 + y * s;
@@ -174,17 +169,18 @@
                     ctxH.clearRect(0, 0, w, h);
                     drawCoordinates();
 
-                    ctxH.strokeStyle = "#ff2d55";
-                    ctxH.lineWidth = 4;
-                    ctxH.shadowBlur = 25;
-                    ctxH.shadowColor = "#ff2d55";
+                    // Gorgeous White Heart Line
+                    ctxH.strokeStyle = "#fff";
+                    ctxH.lineWidth = 3;
+                    ctxH.shadowBlur = 20;
+                    ctxH.shadowColor = "#fff";
                     
                     ctxH.beginPath();
                     ctxH.moveTo(pts[0].x, pts[0].y);
                     pts.forEach(p => ctxH.lineTo(p.x, p.y));
                     ctxH.stroke();
 
-                    t += 0.0051; // Slow 20s draw
+                    t += 0.0051; // 20 Seconds
                     requestAnimationFrame(draw);
                 } else {
                     fillHeart(pts);
@@ -197,13 +193,13 @@
             let a = 0;
             const iv = setInterval(() => {
                 a += 0.008;
-                ctxH.fillStyle = `rgba(255, 45, 85, ${a})`;
-                ctxH.shadowBlur = 40;
+                // Transitioning to a soft white/pink glow for the finish
+                ctxH.fillStyle = `rgba(255, 255, 255, ${a})`;
                 ctxH.beginPath();
                 ctxH.moveTo(pts[0].x, pts[0].y);
                 pts.forEach(p => ctxH.lineTo(p.x, p.y));
                 ctxH.fill();
-                if (a >= 0.7) {
+                if (a >= 0.6) {
                     clearInterval(iv);
                     document.getElementById('final-msg').style.opacity = '1';
                 }
