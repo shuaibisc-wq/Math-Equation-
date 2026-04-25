@@ -47,6 +47,8 @@
 </head>
 <body>
 
+    <audio id="mySong" src="music.mp3" loop></audio>
+
     <canvas id="bgCanvas"></canvas>
     <canvas id="heartCanvas"></canvas>
 
@@ -68,6 +70,7 @@
         const heart = document.getElementById('heartCanvas');
         const ctxB = bg.getContext('2d');
         const ctxH = heart.getContext('2d');
+        const song = document.getElementById('mySong');
 
         let w, h;
         const equations = [
@@ -80,12 +83,12 @@
         function resize() {
             w = bg.width = heart.width = window.innerWidth;
             h = bg.height = heart.height = window.innerHeight;
-            // Redraw background immediately on resize
             ctxB.clearRect(0,0,w,h);
         }
         window.addEventListener('resize', resize);
         resize();
 
+        // Background Particles
         class Particle {
             constructor() { this.reset(); this.y = Math.random() * h; }
             reset() {
@@ -93,10 +96,11 @@
                 this.y = h + 20;
                 this.txt = equations[Math.floor(Math.random() * equations.length)];
                 this.speed = 0.5 + Math.random() * 0.5;
+                // Brighter Equations as requested
                 this.alpha = 0.6 + Math.random() * 0.4;
             }
             draw() {
-                ctxB.font = "14px 'Courier New'";
+                ctxB.font = "16px 'Courier New'";
                 ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
                 ctxB.fillText(this.txt, this.x, this.y);
                 this.y -= this.speed;
@@ -117,7 +121,6 @@
             ctxH.lineWidth = 1;
             ctxH.beginPath(); ctxH.moveTo(0, h/2); ctxH.lineTo(w, h/2); ctxH.stroke();
             ctxH.beginPath(); ctxH.moveTo(w/2, 0); ctxH.lineTo(w/2, h); ctxH.stroke();
-            
             ctxH.fillStyle = "rgba(255, 255, 255, 0.4)";
             ctxH.font = "italic 13px Georgia";
             ctxH.fillText("Time (t)", w - 60, h/2 - 12);
@@ -125,11 +128,14 @@
         }
 
         function initiate() {
+            // Pre-load audio but keep volume at 0
+            song.volume = 0;
+            song.play();
             document.getElementById('cover-page').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('cover-page').style.display = 'none';
                 startLoad();
-            }, 1000);
+            }, 1500);
         }
 
         function startLoad() {
@@ -152,15 +158,18 @@
         function startHeart() {
             let t = 0;
             let pts = [];
-            // Calculate a unified scale factor based on the smaller screen dimension
             const scale = Math.min(w, h) / 45;
+
+            // MUSIC FADE IN
+            let volIn = setInterval(() => {
+                if (song.volume < 0.9) song.volume += 0.05;
+                else clearInterval(volIn);
+            }, 200);
 
             function draw() {
                 if (t <= 2 * Math.PI + 0.01) {
-                    // Optimized Math for Perfect Symmetry
                     let x = 16 * Math.pow(Math.sin(t), 3);
                     let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                    
                     const cx = w/2 + x * scale;
                     const cy = h/2 + y * scale;
                     pts.push({x: cx, y: cy});
@@ -170,7 +179,6 @@
 
                     ctxH.strokeStyle = "#fff";
                     ctxH.lineWidth = 4;
-                    ctxH.lineJoin = "round";
                     ctxH.lineCap = "round";
                     ctxH.shadowBlur = 20;
                     ctxH.shadowColor = "#fff";
@@ -180,7 +188,7 @@
                     pts.forEach(p => ctxH.lineTo(p.x, p.y));
                     ctxH.stroke();
 
-                    t += 0.005; // ~20 Seconds
+                    t += 0.0051; 
                     requestAnimationFrame(draw);
                 } else {
                     fillHeart(pts);
@@ -198,9 +206,19 @@
                 ctxH.moveTo(pts[0].x, pts[0].y);
                 pts.forEach(p => ctxH.lineTo(p.x, p.y));
                 ctxH.fill();
+
                 if (a >= 0.6) {
                     clearInterval(iv);
                     document.getElementById('final-msg').style.opacity = '1';
+                    
+                    // MUSIC FADE OUT
+                    let volOut = setInterval(() => {
+                        if (song.volume > 0.05) song.volume -= 0.05;
+                        else {
+                            song.pause();
+                            clearInterval(volOut);
+                        }
+                    }, 250);
                 }
             }, 30);
         }
