@@ -7,42 +7,63 @@
     <style>
         body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
-        #bgCanvas { z-index: 1; opacity: 0.45; } 
+        #bgCanvas { z-index: 1; opacity: 0.6; } 
         #heartCanvas { z-index: 5; }
 
+        /* Cover Page */
         #cover-page {
             position: fixed; z-index: 20; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: #000; color: white; transition: opacity 1.5s;
         }
-        h1 { font-size: 2.8rem; letter-spacing: 12px; margin-bottom: 50px; font-style: italic; font-weight: 300; text-align: center; }
+        h1 { font-size: 2.5rem; letter-spacing: 10px; margin-bottom: 50px; font-style: italic; font-weight: 300; text-align: center; }
         .btn {
-            padding: 18px 60px; border: 1.5px solid #fff; background: none;
+            padding: 18px 60px; border: 1px solid #fff; background: none;
             color: white; cursor: pointer; font-family: 'Courier New', monospace;
-            border-radius: 4px; transition: 0.5s; letter-spacing: 4px;
+            border-radius: 2px; transition: 0.5s; letter-spacing: 4px;
         }
         .btn:hover { background: white; color: black; box-shadow: 0 0 40px #fff; }
 
+        /* Loading Screen */
         #loading-screen {
             position: fixed; z-index: 30; width: 100%; height: 100%;
             background: #000; display: none; flex-direction: column;
             justify-content: center; align-items: center; color: #fff;
         }
-        .loading-text { font-family: 'Courier New'; letter-spacing: 6px; font-size: 14px; margin-bottom: 15px; }
-        .percent-text { font-family: 'Courier New'; font-size: 26px; margin-bottom: 25px; font-weight: bold; }
-        
-        .bar-container { 
-            width: 500px; height: 24px; background: rgba(255,255,255,0.05); 
-            border: 1px solid rgba(255,255,255,0.3); padding: 4px; border-radius: 2px;
-        }
+        .percent-text { font-family: 'Courier New'; font-size: 26px; margin-bottom: 20px; font-weight: bold; }
+        .bar-container { width: 500px; height: 20px; background: rgba(255,255,255,0.1); border: 1px solid #333; padding: 4px; }
         .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 20px #fff; }
 
-        #final-msg {
-            position: fixed; z-index: 40; width: 100%; text-align: center;
-            top: 50%; transform: translateY(-50%); color: white;
-            font-size: 3.5rem; font-style: italic; opacity: 0; 
-            transition: opacity 4s ease-in-out; text-shadow: 0 0 35px #fff; pointer-events: none;
+        /* Premium Envelope */
+        #envelope-wrapper {
+            position: fixed; z-index: 50; top: 50%; left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            transition: transform 1.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer;
         }
+        .envelope {
+            width: 150px; height: 100px; background: #111; border: 2px solid #fff;
+            position: relative; box-shadow: 0 0 30px rgba(255,255,255,0.2);
+        }
+        .envelope::before {
+            content: ''; position: absolute; top: 0; left: 0;
+            border-left: 75px solid transparent; border-right: 75px solid transparent;
+            border-top: 50px solid #fff;
+        }
+        .heart-seal {
+            position: absolute; top: 40%; left: 50%; transform: translate(-50%, -50%);
+            color: #fff; font-size: 20px; animation: pulse 2s infinite;
+        }
+
+        /* Final Message Reveal */
+        #final-msg {
+            position: fixed; z-index: 60; width: 100%; text-align: center;
+            top: 50%; transform: translateY(-50%); color: white;
+            font-size: 3rem; font-style: italic; opacity: 0; display: none;
+            transition: opacity 3s; text-shadow: 0 0 30px #fff;
+        }
+
+        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); } }
     </style>
 </head>
 <body>
@@ -54,13 +75,19 @@
 
     <div id="cover-page">
         <h1>THE THEOREM OF US</h1>
-        <button class="btn" onclick="initiate()">INITIATE SYSTEM</button>
+        <button class="btn" onclick="initiate()">INITIATE CALCULATION</button>
     </div>
 
     <div id="loading-screen">
-        <div class="loading-text">SOLVING COMPLEX IDENTITIES</div>
         <div class="percent-text" id="percent">0%</div>
         <div class="bar-container"><div class="bar" id="progressBar"></div></div>
+    </div>
+
+    <div id="envelope-wrapper" onclick="revealMessage()">
+        <div class="envelope">
+            <div class="heart-seal">❤</div>
+        </div>
+        <p style="color:white; font-family:'Courier New'; font-size:10px; margin-top:15px; letter-spacing:2px; text-align:center;">CLICK TO OPEN</p>
     </div>
 
     <div id="final-msg">I Love You, Prova</div>
@@ -72,127 +99,76 @@
         const ctxH = heart.getContext('2d');
         const song = document.getElementById('mySong');
 
-        let w, h;
-        const equations = [
-            "Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "∫e^-x² dx = √π",
-            "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "L = T - V", "E = mc²", 
-            "ΔxΔp ≥ ℏ/2", "d/dx[sin x] = cos x", "G_μν + Λg_μν = κT_μν", "∮B·dl = μ₀I"
-        ];
+        let w, h, heartParticles = [];
+        const equations = ["Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "E = mc²", "ΔxΔp ≥ ℏ/2"];
         let parts = [];
 
         function resize() {
             w = bg.width = heart.width = window.innerWidth;
             h = bg.height = heart.height = window.innerHeight;
-            ctxB.clearRect(0,0,w,h);
         }
         window.addEventListener('resize', resize);
         resize();
 
-        // Background Particles
+        class Spark {
+            constructor(x, y) {
+                this.x = x; this.y = y;
+                this.size = Math.random() * 2 + 1;
+                this.speedX = (Math.random() - 0.5) * 3;
+                this.speedY = (Math.random() - 0.5) * 3;
+                this.life = 1;
+            }
+            update() { this.x += this.speedX; this.y += this.speedY; this.life -= 0.02; }
+            draw() { ctxH.fillStyle = `rgba(255, 255, 255, ${this.life})`; ctxH.beginPath(); ctxH.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctxH.fill(); }
+        }
+
         class Particle {
             constructor() { this.reset(); this.y = Math.random() * h; }
-            reset() {
-                this.x = Math.random() * w;
-                this.y = h + 20;
-                this.txt = equations[Math.floor(Math.random() * equations.length)];
-                this.speed = 0.5 + Math.random() * 0.5;
-                // Brighter Equations as requested
-                this.alpha = 0.6 + Math.random() * 0.4;
-            }
-            draw() {
-                ctxB.font = "16px 'Courier New'";
-                ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
-                ctxB.fillText(this.txt, this.x, this.y);
-                this.y -= this.speed;
-                if (this.y < -20) this.reset();
-            }
+            reset() { this.x = Math.random() * w; this.y = h + 20; this.txt = equations[Math.floor(Math.random() * equations.length)]; this.speed = 0.5 + Math.random() * 0.5; this.alpha = 0.6 + Math.random() * 0.4; }
+            draw() { ctxB.font = "16px 'Courier New'"; ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`; ctxB.fillText(this.txt, this.x, this.y); this.y -= this.speed; if (this.y < -20) this.reset(); }
         }
-        for(let i=0; i<40; i++) parts.push(new Particle());
+        for(let i=0; i<35; i++) parts.push(new Particle());
 
-        function animateBg() {
-            ctxB.clearRect(0,0,w,h);
-            parts.forEach(p => p.draw());
-            requestAnimationFrame(animateBg);
-        }
+        function animateBg() { ctxB.clearRect(0,0,w,h); parts.forEach(p => p.draw()); requestAnimationFrame(animateBg); }
         animateBg();
 
-        function drawCoordinates() {
-            ctxH.strokeStyle = "rgba(255, 255, 255, 0.2)";
-            ctxH.lineWidth = 1;
-            ctxH.beginPath(); ctxH.moveTo(0, h/2); ctxH.lineTo(w, h/2); ctxH.stroke();
-            ctxH.beginPath(); ctxH.moveTo(w/2, 0); ctxH.lineTo(w/2, h); ctxH.stroke();
-            ctxH.fillStyle = "rgba(255, 255, 255, 0.4)";
-            ctxH.font = "italic 13px Georgia";
-            ctxH.fillText("Time (t)", w - 60, h/2 - 12);
-            ctxH.fillText("Affection (A)", w/2 + 15, 25);
-        }
-
         function initiate() {
-            // Pre-load audio but keep volume at 0
-            song.volume = 0;
-            song.play();
+            song.volume = 0; song.play();
             document.getElementById('cover-page').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('cover-page').style.display = 'none';
-                startLoad();
-            }, 1500);
+            setTimeout(() => { document.getElementById('cover-page').style.display = 'none'; startLoad(); }, 1500);
         }
 
         function startLoad() {
             const bar = document.getElementById('progressBar');
-            const percent = document.getElementById('percent');
+            const pct = document.getElementById('percent');
             document.getElementById('loading-screen').style.display = 'flex';
             let p = 0;
             const iv = setInterval(() => {
-                p += 0.4;
-                bar.style.width = p + '%';
-                percent.innerText = Math.floor(p) + "%";
-                if (p >= 100) {
-                    clearInterval(iv);
-                    document.getElementById('loading-screen').style.display = 'none';
-                    startHeart();
-                }
+                p += 0.4; bar.style.width = p + '%'; pct.innerText = Math.floor(p) + "%";
+                if (p >= 100) { clearInterval(iv); document.getElementById('loading-screen').style.display = 'none'; startHeart(); }
             }, 20);
         }
 
         function startHeart() {
-            let t = 0;
-            let pts = [];
-            const scale = Math.min(w, h) / 45;
-
-            // MUSIC FADE IN
-            let volIn = setInterval(() => {
-                if (song.volume < 0.9) song.volume += 0.05;
-                else clearInterval(volIn);
-            }, 200);
+            let t = 0; let pts = []; const scale = Math.min(w, h) / 45;
+            let volIn = setInterval(() => { if (song.volume < 0.9) song.volume += 0.05; else clearInterval(volIn); }, 200);
 
             function draw() {
                 if (t <= 2 * Math.PI + 0.01) {
                     let x = 16 * Math.pow(Math.sin(t), 3);
                     let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
-                    const cx = w/2 + x * scale;
-                    const cy = h/2 + y * scale;
+                    const cx = w/2 + x * scale; const cy = h/2 + y * scale;
                     pts.push({x: cx, y: cy});
+                    for(let i=0; i<3; i++) heartParticles.push(new Spark(cx, cy));
 
                     ctxH.clearRect(0, 0, w, h);
-                    drawCoordinates();
+                    heartParticles.forEach((p, i) => { p.update(); p.draw(); if(p.life <= 0) heartParticles.splice(i, 1); });
 
-                    ctxH.strokeStyle = "#fff";
-                    ctxH.lineWidth = 4;
-                    ctxH.lineCap = "round";
-                    ctxH.shadowBlur = 20;
-                    ctxH.shadowColor = "#fff";
-                    
-                    ctxH.beginPath();
-                    ctxH.moveTo(pts[0].x, pts[0].y);
-                    pts.forEach(p => ctxH.lineTo(p.x, p.y));
-                    ctxH.stroke();
+                    ctxH.strokeStyle = "#fff"; ctxH.lineWidth = 4; ctxH.shadowBlur = 25; ctxH.shadowColor = "#fff";
+                    ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x, p.y)); ctxH.stroke();
 
-                    t += 0.0051; 
-                    requestAnimationFrame(draw);
-                } else {
-                    fillHeart(pts);
-                }
+                    t += 0.0051; requestAnimationFrame(draw);
+                } else { fillHeart(pts); }
             }
             draw();
         }
@@ -200,27 +176,24 @@
         function fillHeart(pts) {
             let a = 0;
             const iv = setInterval(() => {
-                a += 0.008;
-                ctxH.fillStyle = `rgba(255, 255, 255, ${a})`;
-                ctxH.beginPath();
-                ctxH.moveTo(pts[0].x, pts[0].y);
-                pts.forEach(p => ctxH.lineTo(p.x, p.y));
-                ctxH.fill();
-
-                if (a >= 0.6) {
-                    clearInterval(iv);
-                    document.getElementById('final-msg').style.opacity = '1';
-                    
-                    // MUSIC FADE OUT
-                    let volOut = setInterval(() => {
-                        if (song.volume > 0.05) song.volume -= 0.05;
-                        else {
-                            song.pause();
-                            clearInterval(volOut);
-                        }
-                    }, 250);
+                a += 0.008; ctxH.fillStyle = `rgba(255, 255, 255, ${a})`;
+                ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x, p.y)); ctxH.fill();
+                if (a >= 0.6) { 
+                    clearInterval(iv); 
+                    document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(1)';
                 }
             }, 30);
+        }
+
+        function revealMessage() {
+            document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(0)';
+            setTimeout(() => {
+                const msg = document.getElementById('final-msg');
+                msg.style.display = 'block';
+                setTimeout(() => { msg.style.opacity = '1'; }, 100);
+                // Music Fade Out
+                let volOut = setInterval(() => { if (song.volume > 0.05) song.volume -= 0.05; else { song.pause(); clearInterval(volOut); } }, 250);
+            }, 1000);
         }
     </script>
 </body>
