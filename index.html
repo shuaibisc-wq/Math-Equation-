@@ -3,61 +3,41 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>The Theorem of Us | Prova</title>
+    <title>Theorem of Love | Prova</title>
     <style>
-        /* Base Styling */
-        body, html { 
-            margin: 0; padding: 0; overflow: hidden; 
-            background-color: #050505; /* Deep Black Theme */
-            font-family: 'Georgia', serif; 
-        }
-        
+        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #050505; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
-        
-        /* Z-Index Layers */
-        #bgCanvas { z-index: 1; opacity: 0.4; } /* Dim Math Background */
-        #heartCanvas { z-index: 5; }             /* Main Heart Animation */
+        #bgCanvas { z-index: 1; } 
+        #heartCanvas { z-index: 5; }
 
-        /* Cover Page Overlay */
         #cover-page {
             position: fixed; z-index: 20; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(5, 5, 5, 0.9); color: white; transition: opacity 1.5s;
+            background: rgba(5, 5, 5, 0.95); color: white; transition: opacity 1.5s;
         }
 
-        h1 { 
-            font-size: 2.8rem; font-weight: 300; letter-spacing: 8px; 
-            margin-bottom: 40px; text-align: center; font-style: italic;
-            animation: pulse 3s infinite;
-        }
-
+        h1 { font-size: 2.5rem; letter-spacing: 8px; margin-bottom: 40px; font-style: italic; text-align: center; }
+        
         .btn {
-            padding: 18px 45px; border: 1px solid rgba(255,255,255,0.3); background: none;
-            color: white; cursor: pointer; letter-spacing: 3px; font-size: 0.8rem;
-            font-family: 'Courier New', monospace; border-radius: 2px; transition: 0.5s;
+            padding: 15px 40px; border: 1px solid #fff; background: none;
+            color: white; cursor: pointer; font-family: 'Courier New', monospace;
+            border-radius: 4px; transition: 0.4s;
         }
-        .btn:hover { background: white; color: black; box-shadow: 0 0 30px rgba(255,255,255,0.4); }
+        .btn:hover { background: white; color: black; box-shadow: 0 0 20px #fff; }
 
-        /* Loading Overlay */
         #loading-screen {
             position: fixed; z-index: 30; width: 100%; height: 100%;
             background: #050505; display: none; flex-direction: column;
-            justify-content: center; align-items: center; color: #777;
+            justify-content: center; align-items: center; color: #fff;
         }
-        .bar-container { width: 280px; height: 2px; background: #1a1a1a; margin-top: 25px; }
-        .bar { width: 0%; height: 100%; background: #ff2d55; box-shadow: 0 0 15px #ff2d55; }
+        .bar-container { width: 280px; height: 3px; background: #222; margin-top: 20px; }
+        .bar { width: 0%; height: 100%; background: #00ffcc; box-shadow: 0 0 10px #00ffcc; }
 
-        /* Final Message */
         #final-msg {
             position: fixed; z-index: 40; width: 100%; text-align: center;
             top: 50%; transform: translateY(-50%); color: white;
-            font-size: 3.5rem; font-style: italic; opacity: 0; 
-            transition: opacity 4s; pointer-events: none;
-            text-shadow: 0 0 25px rgba(255, 20, 147, 0.9);
-        }
-
-        @keyframes pulse {
-            0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; }
+            font-size: 3rem; font-style: italic; opacity: 0; 
+            transition: opacity 3s; text-shadow: 0 0 20px #ff1493; pointer-events: none;
         }
     </style>
 </head>
@@ -68,11 +48,11 @@
 
     <div id="cover-page">
         <h1>THE THEOREM OF US</h1>
-        <button class="btn" onclick="initiateSequence()">INITIATE CALCULATION</button>
+        <button class="btn" onclick="initiate()">START SYSTEM</button>
     </div>
 
     <div id="loading-screen">
-        <div style="letter-spacing: 4px; font-size: 11px; font-family: 'Courier New';">SOLVING COMPLEX IDENTITIES...</div>
+        <div style="letter-spacing: 3px; font-family: 'Courier New';">INITIALIZING CALCULATION...</div>
         <div class="bar-container"><div class="bar" id="progressBar"></div></div>
     </div>
 
@@ -81,23 +61,16 @@
     <script>
         const bg = document.getElementById('bgCanvas');
         const heart = document.getElementById('heartCanvas');
-        const ctxBg = bg.getContext('2d');
+        const ctxB = bg.getContext('2d');
         const ctxH = heart.getContext('2d');
 
         let w, h;
-        const hardEquations = [
-            "Rμν - 1/2 Rgμν + Λgμν = 8πG/c⁴ Tμν",
-            "Ψ(r,t) = Ae^(i(k·r-ωt))",
-            "∇ · E = ρ / ε₀",
-            "∮ B · dl = μ₀(I + ε₀ dΦE/dt)",
-            "ζ(s) = ∑ n⁻ˢ = ∏ (1 - p⁻ˢ)⁻¹",
-            "eiπ + 1 = 0",
-            "S = -k_B ∑ P_i ln P_i",
-            "∂u/∂t = α(∂²u/∂x² + ∂²u/∂y²)",
-            "L = √(-g) R",
-            "d/dx ∫ f(t) dt = f(x)"
+        const equations = [
+            "Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "∫e^-x² dx = √π",
+            "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "P(A|B) = P(B|A)P(A)/P(B)",
+            "Σ F = ma", "E = mc²", "ΔxΔp ≥ ℏ/2", "d/dx[sin x] = cos x"
         ];
-        let particleList = [];
+        let parts = [];
 
         function resize() {
             w = bg.width = heart.width = window.innerWidth;
@@ -106,122 +79,127 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // 1. BACKGROUND ENGINE (Drifting peculiar equations)
-        class EquationNode {
-            constructor() {
-                this.init();
-                this.y = Math.random() * h; // Start at random height
-            }
-            init() {
+        // 1. HIGH VISIBILITY BACKGROUND
+        class Particle {
+            constructor() { this.reset(); this.y = Math.random() * h; }
+            reset() {
                 this.x = Math.random() * w;
-                this.y = h + 50;
-                this.text = hardEquations[Math.floor(Math.random() * hardEquations.length)];
-                this.speed = 0.3 + Math.random() * 0.7;
-                this.size = 11 + Math.random() * 7;
-                this.opacity = 0.1 + Math.random() * 0.5;
-            }
-            update() {
-                this.y -= this.speed;
-                if (this.y < -50) this.init();
+                this.y = h + 20;
+                this.txt = equations[Math.floor(Math.random() * equations.length)];
+                this.speed = 0.5 + Math.random();
+                this.alpha = 0.3 + Math.random() * 0.5; // Increased brightness
             }
             draw() {
-                ctxBg.font = `${this.size}px 'Courier New'`;
-                ctxBg.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
-                ctxBg.fillText(this.text, this.x, this.y);
+                ctxB.font = "14px 'Courier New'";
+                ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctxB.fillText(this.txt, this.x, this.y);
+                this.y -= this.speed;
+                if (this.y < -20) this.reset();
             }
         }
+        for(let i=0; i<40; i++) parts.push(new Particle());
 
-        for(let i=0; i<35; i++) particleList.push(new EquationNode());
-
-        function animateBackground() {
-            ctxBg.clearRect(0, 0, w, h);
-            particleList.forEach(p => { p.update(); p.draw(); });
-            requestAnimationFrame(animateBackground);
+        function animateBg() {
+            ctxB.clearRect(0,0,w,h);
+            parts.forEach(p => p.draw());
+            requestAnimationFrame(animateBg);
         }
-        animateBackground();
+        animateBg();
 
-        // 2. SEQUENCE LOGIC
-        function initiateSequence() {
-            const cover = document.getElementById('cover-page');
-            cover.style.opacity = '0';
+        // 2. COORDINATE SYSTEM
+        function drawCoordinates() {
+            ctxH.strokeStyle = "rgba(255, 255, 255, 0.2)";
+            ctxH.lineWidth = 1;
+            
+            // X-Axis
+            ctxH.beginPath();
+            ctxH.moveTo(0, h/2); ctxH.lineTo(w, h/2);
+            ctxH.stroke();
+            
+            // Y-Axis
+            ctxH.beginPath();
+            ctxH.moveTo(w/2, 0); ctxH.lineTo(w/2, h);
+            ctxH.stroke();
+
+            // Axis Labels
+            ctxH.fillStyle = "rgba(255, 255, 255, 0.5)";
+            ctxH.font = "10px Arial";
+            ctxH.fillText("X-AXIS (TIME)", w - 70, h/2 - 10);
+            ctxH.fillText("Y-AXIS (AFFECTION)", w/2 + 10, 20);
+        }
+
+        // 3. LOGIC
+        function initiate() {
+            document.getElementById('cover-page').style.opacity = '0';
             setTimeout(() => {
-                cover.style.display = 'none';
-                startLoading();
-            }, 1500);
+                document.getElementById('cover-page').style.display = 'none';
+                startLoad();
+            }, 1000);
         }
 
-        function startLoading() {
-            const screen = document.getElementById('loading-screen');
+        function startLoad() {
             const bar = document.getElementById('progressBar');
-            screen.style.display = 'flex';
-            
-            let progress = 0;
-            // Takes approx 5 seconds
-            const interval = setInterval(() => {
-                progress += 0.4;
-                bar.style.width = progress + '%';
-                if (progress >= 100) {
-                    clearInterval(interval);
-                    screen.style.display = 'none';
-                    startHeartAnimation();
+            document.getElementById('loading-screen').style.display = 'flex';
+            let p = 0;
+            const iv = setInterval(() => {
+                p += 0.5;
+                bar.style.width = p + '%';
+                if (p >= 100) {
+                    clearInterval(iv);
+                    document.getElementById('loading-screen').style.display = 'none';
+                    drawCoordinates();
+                    startHeart();
                 }
-            }, 20); 
+            }, 25); // 5 Seconds
         }
 
-        // 3. HEART DRAWING ENGINE
-        function startHeartAnimation() {
+        function startHeart() {
             let t = 0;
-            let points = [];
-            
-            function drawLoop() {
+            let pts = [];
+            function draw() {
                 if (t <= 2 * Math.PI) {
-                    // Parametric Heart Equation
                     let x = 16 * Math.pow(Math.sin(t), 3);
                     let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
                     
-                    const scale = Math.min(w, h) / 45;
-                    const cx = w/2 + x * scale;
-                    const cy = h/2 + y * scale;
-                    
-                    points.push({x: cx, y: cy});
+                    const s = Math.min(w, h) / 45;
+                    const cx = w/2 + x * s;
+                    const cy = h/2 + y * s;
+                    pts.push({x: cx, y: cy});
 
+                    // Clear foreground but keep axes
                     ctxH.clearRect(0, 0, w, h);
-                    
-                    // Style the running red lines
+                    drawCoordinates();
+
                     ctxH.strokeStyle = "#ff1493";
-                    ctxH.lineWidth = 3.5;
-                    ctxH.shadowBlur = 20;
+                    ctxH.lineWidth = 4;
+                    ctxH.shadowBlur = 15;
                     ctxH.shadowColor = "#ff1493";
                     
                     ctxH.beginPath();
-                    ctxH.moveTo(points[0].x, points[0].y);
-                    points.forEach(p => ctxH.lineTo(p.x, p.y));
+                    ctxH.moveTo(pts[0].x, pts[0].y);
+                    pts.forEach(p => ctxH.lineTo(p.x, p.y));
                     ctxH.stroke();
 
-                    // Slow drawing (approx 20 seconds)
-                    t += 0.0051; 
-                    requestAnimationFrame(drawLoop);
+                    t += 0.0051; // 20 Seconds
+                    requestAnimationFrame(draw);
                 } else {
-                    finalize(points);
+                    fillHeart(pts);
                 }
             }
-            drawLoop();
+            draw();
         }
 
-        // 4. FILL AND SURPRISE
-        function finalize(points) {
-            let alpha = 0;
-            const fillInterval = setInterval(() => {
-                alpha += 0.008;
-                ctxH.fillStyle = `rgba(220, 20, 60, ${alpha})`;
+        function fillHeart(pts) {
+            let a = 0;
+            const iv = setInterval(() => {
+                a += 0.01;
+                ctxH.fillStyle = `rgba(255, 20, 147, ${a})`;
                 ctxH.beginPath();
-                ctxH.moveTo(points[0].x, points[0].y);
-                points.forEach(p => ctxH.lineTo(p.x, p.y));
+                ctxH.moveTo(pts[0].x, pts[0].y);
+                pts.forEach(p => ctxH.lineTo(p.x, p.y));
                 ctxH.fill();
-
-                if (alpha >= 0.6) {
-                    clearInterval(fillInterval);
-                    // Show final message
+                if (a >= 0.6) {
+                    clearInterval(iv);
                     document.getElementById('final-msg').style.opacity = '1';
                 }
             }, 30);
