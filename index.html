@@ -3,45 +3,61 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>For Prova</title>
+    <title>The Theorem of Us | Prova</title>
     <style>
-        body, html { margin: 0; padding: 0; overflow: hidden; background: #050505; font-family: 'Georgia', serif; }
+        /* Base Styling */
+        body, html { 
+            margin: 0; padding: 0; overflow: hidden; 
+            background-color: #050505; /* Deep Black Theme */
+            font-family: 'Georgia', serif; 
+        }
+        
         canvas { position: absolute; top: 0; left: 0; }
         
-        /* Layering */
-        #bgCanvas { z-index: 1; opacity: 0.25; }
-        #heartCanvas { z-index: 3; }
+        /* Z-Index Layers */
+        #bgCanvas { z-index: 1; opacity: 0.4; } /* Dim Math Background */
+        #heartCanvas { z-index: 5; }             /* Main Heart Animation */
 
-        /* Cover Page */
-        #ui-layer {
-            position: fixed; z-index: 10; width: 100%; height: 100%;
+        /* Cover Page Overlay */
+        #cover-page {
+            position: fixed; z-index: 20; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            color: white; background: rgba(5, 5, 5, 0.8); transition: opacity 1.5s;
+            background: rgba(5, 5, 5, 0.9); color: white; transition: opacity 1.5s;
         }
 
-        h1 { font-size: 2.5rem; font-weight: 300; letter-spacing: 5px; margin-bottom: 30px; text-align: center; }
+        h1 { 
+            font-size: 2.8rem; font-weight: 300; letter-spacing: 8px; 
+            margin-bottom: 40px; text-align: center; font-style: italic;
+            animation: pulse 3s infinite;
+        }
+
         .btn {
-            padding: 15px 40px; border: 1px solid rgba(255,255,255,0.4); background: none;
-            color: white; cursor: pointer; letter-spacing: 2px; transition: 0.5s;
-            font-family: 'Courier New', monospace; border-radius: 2px;
+            padding: 18px 45px; border: 1px solid rgba(255,255,255,0.3); background: none;
+            color: white; cursor: pointer; letter-spacing: 3px; font-size: 0.8rem;
+            font-family: 'Courier New', monospace; border-radius: 2px; transition: 0.5s;
         }
-        .btn:hover { background: white; color: black; box-shadow: 0 0 20px rgba(255,255,255,0.5); }
+        .btn:hover { background: white; color: black; box-shadow: 0 0 30px rgba(255,255,255,0.4); }
 
-        /* Loading Screen */
+        /* Loading Overlay */
         #loading-screen {
-            position: fixed; z-index: 15; width: 100%; height: 100%;
+            position: fixed; z-index: 30; width: 100%; height: 100%;
             background: #050505; display: none; flex-direction: column;
-            justify-content: center; align-items: center; color: #666;
+            justify-content: center; align-items: center; color: #777;
         }
-        .progress-container { width: 250px; height: 2px; background: #111; margin-top: 20px; }
-        .progress-bar { width: 0%; height: 100%; background: #ff2d55; box-shadow: 0 0 10px #ff2d55; }
+        .bar-container { width: 280px; height: 2px; background: #1a1a1a; margin-top: 25px; }
+        .bar { width: 0%; height: 100%; background: #ff2d55; box-shadow: 0 0 15px #ff2d55; }
 
         /* Final Message */
         #final-msg {
-            position: fixed; z-index: 20; width: 100%; text-align: center;
+            position: fixed; z-index: 40; width: 100%; text-align: center;
             top: 50%; transform: translateY(-50%); color: white;
-            font-size: 3rem; font-style: italic; opacity: 0; transition: opacity 3s;
-            text-shadow: 0 0 20px rgba(255,20,147,0.8); pointer-events: none;
+            font-size: 3.5rem; font-style: italic; opacity: 0; 
+            transition: opacity 4s; pointer-events: none;
+            text-shadow: 0 0 25px rgba(255, 20, 147, 0.9);
+        }
+
+        @keyframes pulse {
+            0% { opacity: 0.7; } 50% { opacity: 1; } 100% { opacity: 0.7; }
         }
     </style>
 </head>
@@ -50,14 +66,14 @@
     <canvas id="bgCanvas"></canvas>
     <canvas id="heartCanvas"></canvas>
 
-    <div id="ui-layer">
+    <div id="cover-page">
         <h1>THE THEOREM OF US</h1>
-        <button class="btn" onclick="startExecution()">INITIATE CALCULATION</button>
+        <button class="btn" onclick="initiateSequence()">INITIATE CALCULATION</button>
     </div>
 
     <div id="loading-screen">
-        <div style="letter-spacing: 3px; font-size: 12px;">RESOLVING COMPLEX IDENTITIES...</div>
-        <div class="progress-container"><div class="progress-bar" id="bar"></div></div>
+        <div style="letter-spacing: 4px; font-size: 11px; font-family: 'Courier New';">SOLVING COMPLEX IDENTITIES...</div>
+        <div class="bar-container"><div class="bar" id="progressBar"></div></div>
     </div>
 
     <div id="final-msg">I Love You, Prova</div>
@@ -69,85 +85,97 @@
         const ctxH = heart.getContext('2d');
 
         let w, h;
-        const equations = [
-            "Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇ × B = μ₀J + μ₀ε₀∂E/∂t", 
-            "iℏ ∂/∂t Ψ(r,t) = Ĥ Ψ(r,t)", "L = T - V", "ds² = -(1-2M/r)dt²",
-            "ζ(s) = ∑ n⁻ˢ", "d/dx [ln(x)] = 1/x", "E = mc²", "eiπ + 1 = 0"
+        const hardEquations = [
+            "Rμν - 1/2 Rgμν + Λgμν = 8πG/c⁴ Tμν",
+            "Ψ(r,t) = Ae^(i(k·r-ωt))",
+            "∇ · E = ρ / ε₀",
+            "∮ B · dl = μ₀(I + ε₀ dΦE/dt)",
+            "ζ(s) = ∑ n⁻ˢ = ∏ (1 - p⁻ˢ)⁻¹",
+            "eiπ + 1 = 0",
+            "S = -k_B ∑ P_i ln P_i",
+            "∂u/∂t = α(∂²u/∂x² + ∂²u/∂y²)",
+            "L = √(-g) R",
+            "d/dx ∫ f(t) dt = f(x)"
         ];
-        let mathStuff = [];
+        let particleList = [];
 
-        function init() {
+        function resize() {
             w = bg.width = heart.width = window.innerWidth;
             h = bg.height = heart.height = window.innerHeight;
         }
-        window.addEventListener('resize', init);
-        init();
+        window.addEventListener('resize', resize);
+        resize();
 
-        // Background: Drifting Equations
-        class MathText {
+        // 1. BACKGROUND ENGINE (Drifting peculiar equations)
+        class EquationNode {
             constructor() {
-                this.reset();
-                this.y = Math.random() * h;
+                this.init();
+                this.y = Math.random() * h; // Start at random height
             }
-            reset() {
+            init() {
                 this.x = Math.random() * w;
                 this.y = h + 50;
-                this.text = equations[Math.floor(Math.random() * equations.length)];
-                this.speed = 0.4 + Math.random() * 0.6;
-                this.size = 12 + Math.random() * 6;
+                this.text = hardEquations[Math.floor(Math.random() * hardEquations.length)];
+                this.speed = 0.3 + Math.random() * 0.7;
+                this.size = 11 + Math.random() * 7;
+                this.opacity = 0.1 + Math.random() * 0.5;
             }
             update() {
                 this.y -= this.speed;
-                if (this.y < -50) this.reset();
+                if (this.y < -50) this.init();
             }
             draw() {
-                ctxBg.font = `${this.size}px Courier New`;
-                ctxBg.fillStyle = "rgba(200, 200, 200, 0.4)";
+                ctxBg.font = `${this.size}px 'Courier New'`;
+                ctxBg.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
                 ctxBg.fillText(this.text, this.x, this.y);
             }
         }
 
-        for(let i=0; i<40; i++) mathStuff.push(new MathText());
+        for(let i=0; i<35; i++) particleList.push(new EquationNode());
 
-        function loop() {
-            ctxBg.clearRect(0,0,w,h);
-            mathStuff.forEach(m => { m.update(); m.draw(); });
-            requestAnimationFrame(loop);
+        function animateBackground() {
+            ctxBg.clearRect(0, 0, w, h);
+            particleList.forEach(p => { p.update(); p.draw(); });
+            requestAnimationFrame(animateBackground);
         }
-        loop();
+        animateBackground();
 
-        function startExecution() {
-            document.getElementById('ui-layer').style.opacity = '0';
+        // 2. SEQUENCE LOGIC
+        function initiateSequence() {
+            const cover = document.getElementById('cover-page');
+            cover.style.opacity = '0';
             setTimeout(() => {
-                document.getElementById('ui-layer').style.display = 'none';
-                runLoading();
+                cover.style.display = 'none';
+                startLoading();
             }, 1500);
         }
 
-        function runLoading() {
+        function startLoading() {
             const screen = document.getElementById('loading-screen');
-            const bar = document.getElementById('bar');
+            const bar = document.getElementById('progressBar');
             screen.style.display = 'flex';
             
             let progress = 0;
-            const timer = setInterval(() => {
-                progress += 0.4; // Controlled speed
+            // Takes approx 5 seconds
+            const interval = setInterval(() => {
+                progress += 0.4;
                 bar.style.width = progress + '%';
                 if (progress >= 100) {
-                    clearInterval(timer);
+                    clearInterval(interval);
                     screen.style.display = 'none';
-                    drawHeartPath();
+                    startHeartAnimation();
                 }
-            }, 20); // Exactly 5 seconds
+            }, 20); 
         }
 
-        function drawHeartPath() {
+        // 3. HEART DRAWING ENGINE
+        function startHeartAnimation() {
             let t = 0;
             let points = [];
             
-            function animate() {
+            function drawLoop() {
                 if (t <= 2 * Math.PI) {
-                    // The "Love Equation"
+                    // Parametric Heart Equation
                     let x = 16 * Math.pow(Math.sin(t), 3);
                     let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
                     
@@ -157,40 +185,43 @@
                     
                     points.push({x: cx, y: cy});
 
-                    ctxH.clearRect(0,0,w,h);
+                    ctxH.clearRect(0, 0, w, h);
                     
-                    // Drawing the line
-                    ctxH.strokeStyle = "#ff2d55";
-                    ctxH.lineWidth = 3;
-                    ctxH.shadowBlur = 15;
-                    ctxH.shadowColor = "#ff2d55";
+                    // Style the running red lines
+                    ctxH.strokeStyle = "#ff1493";
+                    ctxH.lineWidth = 3.5;
+                    ctxH.shadowBlur = 20;
+                    ctxH.shadowColor = "#ff1493";
                     
                     ctxH.beginPath();
                     ctxH.moveTo(points[0].x, points[0].y);
                     points.forEach(p => ctxH.lineTo(p.x, p.y));
                     ctxH.stroke();
 
-                    t += 0.0051; // Speed tuned for ~20 seconds at 60fps
-                    requestAnimationFrame(animate);
+                    // Slow drawing (approx 20 seconds)
+                    t += 0.0051; 
+                    requestAnimationFrame(drawLoop);
                 } else {
-                    fillAndSurprise(points);
+                    finalize(points);
                 }
             }
-            animate();
+            drawLoop();
         }
 
-        function fillAndSurprise(points) {
+        // 4. FILL AND SURPRISE
+        function finalize(points) {
             let alpha = 0;
-            const fillTimer = setInterval(() => {
-                alpha += 0.01;
-                ctxH.fillStyle = `rgba(255, 20, 147, ${alpha})`;
+            const fillInterval = setInterval(() => {
+                alpha += 0.008;
+                ctxH.fillStyle = `rgba(220, 20, 60, ${alpha})`;
                 ctxH.beginPath();
                 ctxH.moveTo(points[0].x, points[0].y);
                 points.forEach(p => ctxH.lineTo(p.x, p.y));
                 ctxH.fill();
 
-                if (alpha >= 0.5) {
-                    clearInterval(fillTimer);
+                if (alpha >= 0.6) {
+                    clearInterval(fillInterval);
+                    // Show final message
                     document.getElementById('final-msg').style.opacity = '1';
                 }
             }, 30);
