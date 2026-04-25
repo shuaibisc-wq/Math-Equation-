@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>The Theorem of Us</title>
+    <style>
+        body, html { margin: 0; padding: 0; overflow: hidden; background: #0a0a0a; font-family: 'Georgia', serif; }
+        
+        /* Background Equations Canvas */
+        #bgCanvas { position: fixed; top: 0; left: 0; z-index: 1; opacity: 0.3; }
+
+        /* Cover Page */
+        #cover {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 10; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; color: white;
+            transition: opacity 1s ease;
+        }
+
+        h1 { font-size: 3rem; font-style: italic; margin-bottom: 20px; animation: fadeIn 3s; }
+        
+        .btn {
+            padding: 12px 30px; border: 1px solid white; background: transparent;
+            color: white; cursor: pointer; border-radius: 30px; font-family: 'Courier New', monospace;
+            transition: 0.3s;
+        }
+        .btn:hover { background: white; color: black; }
+
+        /* Loading Section */
+        #loading {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 9; flex-direction: column; justify-content: center; align-items: center; color: #888;
+        }
+        .bar-container { width: 300px; height: 4px; background: #222; margin-top: 20px; }
+        .bar { width: 0%; height: 100%; background: #ff1493; }
+
+        /* Animation Section */
+        #main-stage {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            z-index: 5; display: none; justify-content: center; align-items: center;
+        }
+        canvas#heartCanvas { z-index: 6; }
+
+        #final-msg {
+            position: absolute; color: white; font-size: 2.5rem; font-style: italic;
+            opacity: 0; transition: opacity 2s ease; z-index: 7; text-align: center;
+        }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <canvas id="bgCanvas"></canvas>
+
+    <div id="cover">
+        <h1>The Theorem of Us</h1>
+        <button class="btn" onclick="startSequence()">INITIATE CALCULATION</button>
+    </div>
+
+    <div id="loading">
+        <div id="load-text">Solving Complex Identities...</div>
+        <div class="bar-container"><div class="bar" id="progressBar"></div></div>
+    </div>
+
+    <div id="main-stage">
+        <canvas id="heartCanvas"></canvas>
+        <div id="final-msg">I Love You, Prova</div>
+    </div>
+
+    <script>
+        const bgCanvas = document.getElementById('bgCanvas');
+        const ctxBg = bgCanvas.getContext('2d');
+        const heartCanvas = document.getElementById('heartCanvas');
+        const ctxHeart = heartCanvas.getContext('2d');
+
+        let width, height;
+        const equations = ["∇×E=-∂B/∂t", "ψ(r,t)=Ae^i", "∫e^-x²dx=√π", "eiπ+1=0", "Σ1/n²=π²/6", "δS=0", "F=G(m1m2)/r²"];
+        let particles = [];
+
+        function resize() {
+            width = bgCanvas.width = heartCanvas.width = window.innerWidth;
+            height = bgCanvas.height = heartCanvas.height = window.innerHeight;
+        }
+        window.addEventListener('resize', resize);
+        resize();
+
+        // 1. Dim Background Animation
+        class Equation {
+            constructor() {
+                this.x = Math.random() * width;
+                this.y = Math.random() * height;
+                this.text = equations[Math.floor(Math.random() * equations.length)];
+                this.speed = 0.5 + Math.random();
+            }
+            draw() {
+                ctxBg.fillStyle = "rgba(100, 100, 100, 0.5)";
+                ctxBg.font = "14px Courier New";
+                ctxBg.fillText(this.text, this.x, this.y);
+                this.y -= this.speed;
+                if (this.y < -20) this.y = height + 20;
+            }
+        }
+
+        for(let i=0; i<30; i++) particles.push(new Equation());
+
+        function animateBg() {
+            ctxBg.clearRect(0, 0, width, height);
+            particles.forEach(p => p.draw());
+            requestAnimationFrame(animateBg);
+        }
+        animateBg();
+
+        // 2. Transition Logic
+        function startSequence() {
+            document.getElementById('cover').style.opacity = '0';
+            setTimeout(() => {
+                document.getElementById('cover').style.display = 'none';
+                document.getElementById('loading').style.display = 'flex';
+                let progress = 0;
+                const interval = setInterval(() => {
+                    progress += 1;
+                    document.getElementById('progressBar').style.width = progress + '%';
+                    if (progress >= 100) {
+                        clearInterval(interval);
+                        showHeartStage();
+                    }
+                }, 50); // 5 seconds total
+            }, 1000);
+        }
+
+        // 3. Heart Drawing
+        function showHeartStage() {
+            document.getElementById('loading').style.display = 'none';
+            document.getElementById('main-stage').style.display = 'flex';
+            
+            let t = 0;
+            const points = [];
+            
+            function drawHeart() {
+                if (t <= 2 * Math.PI) {
+                    // Coordinates based on the equation
+                    let x = 16 * Math.pow(Math.sin(t), 3);
+                    let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                    
+                    const scale = Math.min(width, height) / 45;
+                    const cx = width / 2 + x * scale;
+                    const cy = height / 2 + y * scale;
+                    
+                    points.push({x: cx, y: cy});
+                    
+                    ctxHeart.clearRect(0, 0, width, height);
+                    
+                    // Draw Line
+                    ctxHeart.strokeStyle = "#ff1493";
+                    ctxHeart.lineWidth = 3;
+                    ctxHeart.beginPath();
+                    ctxHeart.moveTo(points[0].x, points[0].y);
+                    for(let p of points) ctxHeart.lineTo(p.x, p.y);
+                    ctxHeart.stroke();
+
+                    t += 0.005; // Slow draw (~20 seconds)
+                    requestAnimationFrame(drawHeart);
+                } else {
+                    fillHeart();
+                }
+            }
+            drawHeart();
+        }
+
+        function fillHeart() {
+            let alpha = 0;
+            const interval = setInterval(() => {
+                alpha += 0.01;
+                ctxHeart.fillStyle = `rgba(255, 20, 147, ${alpha})`;
+                ctxHeart.fill();
+                if (alpha >= 0.6) {
+                    clearInterval(interval);
+                    document.getElementById('final-msg').style.opacity = '1';
+                }
+            }, 30);
+        }
+    </script>
+</body>
+</html>
