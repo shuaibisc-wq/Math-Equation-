@@ -5,40 +5,54 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Theorem of Love | Prova</title>
     <style>
-        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #050505; font-family: 'Georgia', serif; }
+        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #030303; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
         #bgCanvas { z-index: 1; } 
         #heartCanvas { z-index: 5; }
 
+        /* Cover Page */
         #cover-page {
             position: fixed; z-index: 20; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: rgba(5, 5, 5, 0.95); color: white; transition: opacity 1.5s;
+            background: radial-gradient(circle, rgba(20,20,20,0.9) 0%, rgba(5,5,5,1) 100%); 
+            color: white; transition: opacity 1.5s;
         }
 
-        h1 { font-size: 2.5rem; letter-spacing: 8px; margin-bottom: 40px; font-style: italic; text-align: center; }
+        h1 { font-size: 2.8rem; letter-spacing: 12px; margin-bottom: 50px; font-style: italic; text-align: center; font-weight: 300; }
         
         .btn {
-            padding: 15px 40px; border: 1px solid #fff; background: none;
+            padding: 18px 60px; border: 1px solid rgba(255,255,255,0.5); background: none;
             color: white; cursor: pointer; font-family: 'Courier New', monospace;
-            border-radius: 4px; transition: 0.4s;
+            border-radius: 50px; transition: 0.5s; letter-spacing: 4px;
         }
-        .btn:hover { background: white; color: black; box-shadow: 0 0 20px #fff; }
+        .btn:hover { background: white; color: black; box-shadow: 0 0 40px rgba(255,255,255,0.6); transform: scale(1.05); }
 
+        /* Loading Screen - Widened Bar */
         #loading-screen {
             position: fixed; z-index: 30; width: 100%; height: 100%;
             background: #050505; display: none; flex-direction: column;
             justify-content: center; align-items: center; color: #fff;
         }
-        .bar-container { width: 280px; height: 3px; background: #222; margin-top: 20px; }
-        .bar { width: 0%; height: 100%; background: #00ffcc; box-shadow: 0 0 10px #00ffcc; }
+        .bar-container { 
+            width: 500px; /* WIDENED BAR */
+            height: 2px; 
+            background: rgba(255,255,255,0.1); 
+            margin-top: 30px; 
+            border-radius: 10px;
+            overflow: hidden;
+        }
+        .bar { width: 0%; height: 100%; background: #ff2d55; box-shadow: 0 0 20px #ff2d55; transition: width 0.1s; }
 
+        /* Final Message */
         #final-msg {
             position: fixed; z-index: 40; width: 100%; text-align: center;
             top: 50%; transform: translateY(-50%); color: white;
-            font-size: 3rem; font-style: italic; opacity: 0; 
-            transition: opacity 3s; text-shadow: 0 0 20px #ff1493; pointer-events: none;
+            font-size: 3.5rem; font-style: italic; opacity: 0; 
+            transition: opacity 4s ease-in-out; text-shadow: 0 0 30px #ff1493; pointer-events: none;
         }
+        
+        .loading-text { font-family: 'Courier New'; letter-spacing: 6px; font-size: 14px; color: #ff2d55; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body>
@@ -48,11 +62,11 @@
 
     <div id="cover-page">
         <h1>THE THEOREM OF US</h1>
-        <button class="btn" onclick="initiate()">START SYSTEM</button>
+        <button class="btn" onclick="initiate()">INITIATE SYSTEM</button>
     </div>
 
     <div id="loading-screen">
-        <div style="letter-spacing: 3px; font-family: 'Courier New';">INITIALIZING CALCULATION...</div>
+        <div class="loading-text">SOLVING COMPLEX IDENTITIES...</div>
         <div class="bar-container"><div class="bar" id="progressBar"></div></div>
     </div>
 
@@ -68,7 +82,8 @@
         const equations = [
             "Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "∫e^-x² dx = √π",
             "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "P(A|B) = P(B|A)P(A)/P(B)",
-            "Σ F = ma", "E = mc²", "ΔxΔp ≥ ℏ/2", "d/dx[sin x] = cos x"
+            "L = T - V", "E = mc²", "ΔxΔp ≥ ℏ/2", "d/dx[sin x] = cos x",
+            "G_μν + Λg_μν = κT_μν", "∮E·dA = Q/ε₀"
         ];
         let parts = [];
 
@@ -79,25 +94,24 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // 1. HIGH VISIBILITY BACKGROUND
         class Particle {
             constructor() { this.reset(); this.y = Math.random() * h; }
             reset() {
                 this.x = Math.random() * w;
                 this.y = h + 20;
                 this.txt = equations[Math.floor(Math.random() * equations.length)];
-                this.speed = 0.5 + Math.random();
-                this.alpha = 0.3 + Math.random() * 0.5; // Increased brightness
+                this.speed = 0.4 + Math.random() * 0.8;
+                this.alpha = 0.2 + Math.random() * 0.5;
             }
             draw() {
-                ctxB.font = "14px 'Courier New'";
+                ctxB.font = "15px 'Courier New'";
                 ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
                 ctxB.fillText(this.txt, this.x, this.y);
                 this.y -= this.speed;
                 if (this.y < -20) this.reset();
             }
         }
-        for(let i=0; i<40; i++) parts.push(new Particle());
+        for(let i=0; i<45; i++) parts.push(new Particle());
 
         function animateBg() {
             ctxB.clearRect(0,0,w,h);
@@ -106,35 +120,27 @@
         }
         animateBg();
 
-        // 2. COORDINATE SYSTEM
         function drawCoordinates() {
-            ctxH.strokeStyle = "rgba(255, 255, 255, 0.2)";
+            ctxH.setLineDash([5, 15]); // Charming dashed lines
+            ctxH.strokeStyle = "rgba(255, 255, 255, 0.15)";
             ctxH.lineWidth = 1;
             
-            // X-Axis
-            ctxH.beginPath();
-            ctxH.moveTo(0, h/2); ctxH.lineTo(w, h/2);
-            ctxH.stroke();
+            ctxH.beginPath(); ctxH.moveTo(0, h/2); ctxH.lineTo(w, h/2); ctxH.stroke();
+            ctxH.beginPath(); ctxH.moveTo(w/2, 0); ctxH.lineTo(w/2, h); ctxH.stroke();
             
-            // Y-Axis
-            ctxH.beginPath();
-            ctxH.moveTo(w/2, 0); ctxH.lineTo(w/2, h);
-            ctxH.stroke();
-
-            // Axis Labels
-            ctxH.fillStyle = "rgba(255, 255, 255, 0.5)";
-            ctxH.font = "10px Arial";
-            ctxH.fillText("X-AXIS (TIME)", w - 70, h/2 - 10);
-            ctxH.fillText("Y-AXIS (AFFECTION)", w/2 + 10, 20);
+            ctxH.setLineDash([]); // Reset
+            ctxH.fillStyle = "rgba(255, 255, 255, 0.4)";
+            ctxH.font = "italic 12px Georgia";
+            ctxH.fillText("Time Complexity", w - 120, h/2 - 15);
+            ctxH.fillText("Affection Magnitude", w/2 + 20, 30);
         }
 
-        // 3. LOGIC
         function initiate() {
             document.getElementById('cover-page').style.opacity = '0';
             setTimeout(() => {
                 document.getElementById('cover-page').style.display = 'none';
                 startLoad();
-            }, 1000);
+            }, 1500);
         }
 
         function startLoad() {
@@ -142,15 +148,14 @@
             document.getElementById('loading-screen').style.display = 'flex';
             let p = 0;
             const iv = setInterval(() => {
-                p += 0.5;
+                p += 0.4;
                 bar.style.width = p + '%';
                 if (p >= 100) {
                     clearInterval(iv);
                     document.getElementById('loading-screen').style.display = 'none';
-                    drawCoordinates();
                     startHeart();
                 }
-            }, 25); // 5 Seconds
+            }, 20); // Smooth 5s load
         }
 
         function startHeart() {
@@ -166,21 +171,20 @@
                     const cy = h/2 + y * s;
                     pts.push({x: cx, y: cy});
 
-                    // Clear foreground but keep axes
                     ctxH.clearRect(0, 0, w, h);
                     drawCoordinates();
 
-                    ctxH.strokeStyle = "#ff1493";
+                    ctxH.strokeStyle = "#ff2d55";
                     ctxH.lineWidth = 4;
-                    ctxH.shadowBlur = 15;
-                    ctxH.shadowColor = "#ff1493";
+                    ctxH.shadowBlur = 25;
+                    ctxH.shadowColor = "#ff2d55";
                     
                     ctxH.beginPath();
                     ctxH.moveTo(pts[0].x, pts[0].y);
                     pts.forEach(p => ctxH.lineTo(p.x, p.y));
                     ctxH.stroke();
 
-                    t += 0.0051; // 20 Seconds
+                    t += 0.0051; // Slow 20s draw
                     requestAnimationFrame(draw);
                 } else {
                     fillHeart(pts);
@@ -192,13 +196,14 @@
         function fillHeart(pts) {
             let a = 0;
             const iv = setInterval(() => {
-                a += 0.01;
-                ctxH.fillStyle = `rgba(255, 20, 147, ${a})`;
+                a += 0.008;
+                ctxH.fillStyle = `rgba(255, 45, 85, ${a})`;
+                ctxH.shadowBlur = 40;
                 ctxH.beginPath();
                 ctxH.moveTo(pts[0].x, pts[0].y);
                 pts.forEach(p => ctxH.lineTo(p.x, p.y));
                 ctxH.fill();
-                if (a >= 0.6) {
+                if (a >= 0.7) {
                     clearInterval(iv);
                     document.getElementById('final-msg').style.opacity = '1';
                 }
