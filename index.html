@@ -7,10 +7,9 @@
     <style>
         body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
-        #bgCanvas { z-index: 1; opacity: 0.5; } 
+        #bgCanvas { z-index: 1; opacity: 0.6; } 
         #heartCanvas { z-index: 5; }
 
-        /* Cover Page */
         #cover-page {
             position: fixed; z-index: 20; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
@@ -24,17 +23,15 @@
         }
         .btn:hover { background: white; color: black; box-shadow: 0 0 40px #fff; }
 
-        /* Loading Screen */
         #loading-screen {
             position: fixed; z-index: 30; width: 100%; height: 100%;
             background: #000; display: none; flex-direction: column;
             justify-content: center; align-items: center; color: #fff;
         }
         .percent-text { font-family: 'Courier New'; font-size: 26px; margin-bottom: 20px; font-weight: bold; }
-        .bar-container { width: 500px; height: 20px; background: rgba(255,255,255,0.1); border: 1px solid #333; padding: 4px; }
+        .bar-container { width: 500px; height: 24px; background: rgba(255,255,255,0.1); border: 1px solid #333; padding: 4px; }
         .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 20px #fff; }
 
-        /* Premium Envelope */
         #envelope-wrapper {
             position: fixed; z-index: 50; top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0);
@@ -55,17 +52,15 @@
             color: #fff; font-size: 24px; animation: pulse 2s infinite;
         }
 
-        /* Final Message - FIXED VISIBILITY */
         #final-msg {
             position: fixed; z-index: 100; width: 100%; text-align: center;
             top: 50%; left: 50%; transform: translate(-50%, -50%);
             color: white; font-size: 3.2rem; font-style: italic;
             opacity: 0; pointer-events: none;
             transition: opacity 2.5s ease-in-out;
-            /* Added heavy dark shadow to make white text pop on the white heart */
-            text-shadow: 0 0 10px #000, 0 0 20px #000, 0 0 30px #000;
-            background: rgba(0, 0, 0, 0.3); /* Slight dimming behind text */
-            padding: 20px;
+            text-shadow: 0 0 15px #000, 0 0 30px #000;
+            background: rgba(0, 0, 0, 0.4);
+            padding: 30px; border-radius: 10px;
         }
 
         @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); } }
@@ -92,7 +87,7 @@
         <div class="envelope">
             <div class="heart-seal">❤</div>
         </div>
-        <p style="color:white; font-family:'Courier New'; font-size:11px; margin-top:20px; letter-spacing:3px;">OPEN ENVELOPE</p>
+        <p style="color:white; font-family:'Courier New'; font-size:11px; margin-top:20px; letter-spacing:3px;">FOR MY GIRLFRIEND</p>
     </div>
 
     <div id="final-msg">I Love You, Prova</div>
@@ -105,7 +100,7 @@
         const song = document.getElementById('mySong');
 
         let w, h, heartParticles = [];
-        const equations = ["Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "E = mc²"];
+        const equations = ["Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "E = mc²", "∫e^-x² dx = √π", "ΔxΔp ≥ ℏ/2", "G_μν + Λg_μν = κT_μν"];
         let parts = [];
 
         function resize() {
@@ -128,14 +123,42 @@
         }
 
         class Particle {
-            constructor() { this.reset(); this.y = Math.random() * h; }
-            reset() { this.x = Math.random() * w; this.y = h + 20; this.txt = equations[Math.floor(Math.random() * equations.length)]; this.speed = 0.5 + Math.random() * 0.5; this.alpha = 0.6 + Math.random() * 0.4; }
-            draw() { ctxB.font = "16px 'Courier New'"; ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`; ctxB.fillText(this.txt, this.x, this.y); this.y -= this.speed; if (this.y < -20) this.reset(); }
+            constructor(initialY) { 
+                this.x = Math.random() * w; 
+                this.y = initialY !== undefined ? initialY : h + 50; 
+                this.txt = equations[Math.floor(Math.random() * equations.length)]; 
+                this.speed = 0.4 + Math.random() * 0.6; 
+                this.alpha = 0.5 + Math.random() * 0.5; 
+            }
+            draw() { 
+                ctxB.font = "15px 'Courier New'"; 
+                ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`; 
+                ctxB.fillText(this.txt, this.x, this.y); 
+                this.y -= this.speed; 
+                if (this.y < -50) { this.y = h + 50; this.x = Math.random() * w; } 
+            }
         }
-        for(let i=0; i<30; i++) parts.push(new Particle());
+        // Spawn particles across the WHOLE screen initially
+        for(let i=0; i<45; i++) parts.push(new Particle(Math.random() * h));
 
         function animateBg() { ctxB.clearRect(0,0,w,h); parts.forEach(p => p.draw()); requestAnimationFrame(animateBg); }
         animateBg();
+
+        function drawAxis() {
+            ctxH.setLineDash([5, 5]); // Dotted line style for axis
+            ctxH.strokeStyle = "rgba(255, 255, 255, 0.3)";
+            ctxH.lineWidth = 1;
+            // X-Axis (Horizontal)
+            ctxH.beginPath(); ctxH.moveTo(w*0.1, h/2); ctxH.lineTo(w*0.9, h/2); ctxH.stroke();
+            // Y-Axis (Vertical)
+            ctxH.beginPath(); ctxH.moveTo(w/2, h*0.1); ctxH.lineTo(w/2, h*0.9); ctxH.stroke();
+            ctxH.setLineDash([]); // Reset to solid lines
+            
+            ctxH.fillStyle = "rgba(255, 255, 255, 0.5)";
+            ctxH.font = "italic 12px 'Courier New'";
+            ctxH.fillText("Time (t)", w*0.9 - 60, h/2 - 10);
+            ctxH.fillText("Affection (A)", w/2 + 10, h*0.1 + 20);
+        }
 
         function initiate() {
             song.volume = 0; song.play().catch(e => console.log("Music play failed"));
@@ -167,6 +190,7 @@
                     for(let i=0; i<3; i++) heartParticles.push(new Spark(cx, cy));
 
                     ctxH.clearRect(0, 0, w, h);
+                    drawAxis(); // Keep Axis behind the heart
                     heartParticles.forEach((p, i) => { p.update(); p.draw(); if(p.life <= 0) heartParticles.splice(i, 1); });
 
                     ctxH.strokeStyle = "#fff"; ctxH.lineWidth = 4; ctxH.shadowBlur = 25; ctxH.shadowColor = "#fff";
@@ -195,7 +219,6 @@
             setTimeout(() => {
                 const msg = document.getElementById('final-msg');
                 msg.style.opacity = '1';
-                // Music Fade Out
                 let volOut = setInterval(() => { if (song.volume > 0.05) song.volume -= 0.05; else { song.pause(); clearInterval(volOut); } }, 250);
             }, 800);
         }
