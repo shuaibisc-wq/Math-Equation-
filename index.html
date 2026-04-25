@@ -7,7 +7,7 @@
     <style>
         body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
-        #bgCanvas { z-index: 1; opacity: 0.6; } 
+        #bgCanvas { z-index: 1; opacity: 0.5; } 
         #heartCanvas { z-index: 5; }
 
         /* Cover Page */
@@ -43,7 +43,7 @@
         }
         .envelope {
             width: 150px; height: 100px; background: #000; border: 2px solid #fff;
-            position: relative; box-shadow: 0 0 30px rgba(255,255,255,0.2);
+            position: relative; box-shadow: 0 0 30px rgba(255,255,255,0.4);
         }
         .envelope::before {
             content: ''; position: absolute; top: 0; left: 0;
@@ -55,14 +55,17 @@
             color: #fff; font-size: 24px; animation: pulse 2s infinite;
         }
 
-        /* Final Message */
+        /* Final Message - FIXED VISIBILITY */
         #final-msg {
             position: fixed; z-index: 100; width: 100%; text-align: center;
             top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 3.5rem; font-style: italic;
+            color: white; font-size: 3.2rem; font-style: italic;
             opacity: 0; pointer-events: none;
-            transition: opacity 3s ease-in-out;
-            text-shadow: 0 0 40px #fff, 0 0 10px #fff;
+            transition: opacity 2.5s ease-in-out;
+            /* Added heavy dark shadow to make white text pop on the white heart */
+            text-shadow: 0 0 10px #000, 0 0 20px #000, 0 0 30px #000;
+            background: rgba(0, 0, 0, 0.3); /* Slight dimming behind text */
+            padding: 20px;
         }
 
         @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); } }
@@ -102,7 +105,7 @@
         const song = document.getElementById('mySong');
 
         let w, h, heartParticles = [];
-        const equations = ["Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "∫e^-x² dx = √π", "eiπ + 1 = 0", "E = mc²", "G_μν + Λg_μν = κT_μν"];
+        const equations = ["Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "E = mc²"];
         let parts = [];
 
         function resize() {
@@ -126,10 +129,10 @@
 
         class Particle {
             constructor() { this.reset(); this.y = Math.random() * h; }
-            reset() { this.x = Math.random() * w; this.y = h + 20; this.txt = equations[Math.floor(Math.random() * equations.length)]; this.speed = 0.4 + Math.random() * 0.6; this.alpha = 0.6 + Math.random() * 0.4; }
+            reset() { this.x = Math.random() * w; this.y = h + 20; this.txt = equations[Math.floor(Math.random() * equations.length)]; this.speed = 0.5 + Math.random() * 0.5; this.alpha = 0.6 + Math.random() * 0.4; }
             draw() { ctxB.font = "16px 'Courier New'"; ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`; ctxB.fillText(this.txt, this.x, this.y); this.y -= this.speed; if (this.y < -20) this.reset(); }
         }
-        for(let i=0; i<35; i++) parts.push(new Particle());
+        for(let i=0; i<30; i++) parts.push(new Particle());
 
         function animateBg() { ctxB.clearRect(0,0,w,h); parts.forEach(p => p.draw()); requestAnimationFrame(animateBg); }
         animateBg();
@@ -182,26 +185,18 @@
                 ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x, p.y)); ctxH.fill();
                 if (a >= 0.6) { 
                     clearInterval(iv); 
-                    // Show Envelope
                     document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(1)';
                 }
             }, 30);
         }
 
         function revealMessage() {
-            // Hide envelope
             document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(0)';
-            
-            // Wait for envelope to vanish then show message
             setTimeout(() => {
                 const msg = document.getElementById('final-msg');
                 msg.style.opacity = '1';
-                
                 // Music Fade Out
-                let volOut = setInterval(() => { 
-                    if (song.volume > 0.05) song.volume -= 0.05; 
-                    else { song.pause(); clearInterval(volOut); } 
-                }, 250);
+                let volOut = setInterval(() => { if (song.volume > 0.05) song.volume -= 0.05; else { song.pause(); clearInterval(volOut); } }, 250);
             }, 800);
         }
     </script>
