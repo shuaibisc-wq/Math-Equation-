@@ -7,15 +7,16 @@
     <style>
         body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
-        #bgCanvas { z-index: 1; opacity: 0.6; } 
+        #bgCanvas { z-index: 1; opacity: 0.65; } 
         #heartCanvas { z-index: 5; }
 
+        /* Cover Page */
         #cover-page {
             position: fixed; z-index: 20; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: #000; color: white; transition: opacity 1.5s;
         }
-        h1 { font-size: 2.5rem; letter-spacing: 10px; margin-bottom: 50px; font-style: italic; font-weight: 300; text-align: center; }
+        h1 { font-size: 2.5rem; letter-spacing: 12px; margin-bottom: 50px; font-style: italic; font-weight: 300; text-align: center; }
         .btn {
             padding: 18px 60px; border: 1px solid #fff; background: none;
             color: white; cursor: pointer; font-family: 'Courier New', monospace;
@@ -23,15 +24,17 @@
         }
         .btn:hover { background: white; color: black; box-shadow: 0 0 40px #fff; }
 
+        /* Loading Screen */
         #loading-screen {
             position: fixed; z-index: 30; width: 100%; height: 100%;
             background: #000; display: none; flex-direction: column;
             justify-content: center; align-items: center; color: #fff;
         }
         .percent-text { font-family: 'Courier New'; font-size: 26px; margin-bottom: 20px; font-weight: bold; }
-        .bar-container { width: 500px; height: 24px; background: rgba(255,255,255,0.1); border: 1px solid #333; padding: 4px; }
+        .bar-container { width: 500px; height: 24px; background: rgba(255,255,255,0.1); border: 1px solid #444; padding: 4px; }
         .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 20px #fff; }
 
+        /* Envelope UI */
         #envelope-wrapper {
             position: fixed; z-index: 50; top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0);
@@ -39,28 +42,28 @@
             cursor: pointer; display: flex; flex-direction: column; align-items: center;
         }
         .envelope {
-            width: 150px; height: 100px; background: #000; border: 2px solid #fff;
-            position: relative; box-shadow: 0 0 30px rgba(255,255,255,0.4);
+            width: 160px; height: 110px; background: #000; border: 2px solid #fff;
+            position: relative; box-shadow: 0 0 40px rgba(255,255,255,0.3);
         }
         .envelope::before {
             content: ''; position: absolute; top: 0; left: 0;
-            border-left: 75px solid transparent; border-right: 75px solid transparent;
-            border-top: 50px solid #fff;
+            border-left: 80px solid transparent; border-right: 80px solid transparent;
+            border-top: 55px solid #fff;
         }
         .heart-seal {
             position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%);
-            color: #fff; font-size: 24px; animation: pulse 2s infinite;
+            color: #fff; font-size: 28px; animation: pulse 2s infinite;
         }
 
+        /* Final Message - ELEGANT UPDATED */
         #final-msg {
             position: fixed; z-index: 100; width: 100%; text-align: center;
             top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 3.2rem; font-style: italic;
-            opacity: 0; pointer-events: none;
-            transition: opacity 2.5s ease-in-out;
-            text-shadow: 0 0 15px #000, 0 0 30px #000;
-            background: rgba(0, 0, 0, 0.4);
-            padding: 30px; border-radius: 10px;
+            color: white; font-size: 3.8rem; font-family: 'Times New Roman', Times, serif; 
+            font-style: italic; opacity: 0; pointer-events: none;
+            transition: opacity 3s ease-in-out;
+            text-shadow: 0 0 15px #000, 0 0 40px #000;
+            background: rgba(0, 0, 0, 0.5); padding: 40px;
         }
 
         @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); } }
@@ -87,10 +90,10 @@
         <div class="envelope">
             <div class="heart-seal">❤</div>
         </div>
-        <p style="color:white; font-family:'Courier New'; font-size:11px; margin-top:20px; letter-spacing:3px;">FOR MY GIRLFRIEND</p>
+        <p style="color:white; font-family:'Courier New'; font-size:12px; margin-top:25px; letter-spacing:4px; font-weight:bold;">FOR MY LOVE</p>
     </div>
 
-    <div id="final-msg">I Love You, Prova</div>
+    <div id="final-msg">Forever Yours, My Love</div>
 
     <script>
         const bg = document.getElementById('bgCanvas');
@@ -100,7 +103,11 @@
         const song = document.getElementById('mySong');
 
         let w, h, heartParticles = [];
-        const equations = ["Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", "E = mc²", "∫e^-x² dx = √π", "ΔxΔp ≥ ℏ/2", "G_μν + Λg_μν = κT_μν"];
+        const equations = [
+            "Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", 
+            "E = mc²", "∫e^-x² dx = √π", "ΔxΔp ≥ ℏ/2", "G_μν + Λg_μν = κT_μν", 
+            "∮B·dl = μ₀I", "d/dx[ln x] = 1/x", "a² + b² = c²"
+        ];
         let parts = [];
 
         function resize() {
@@ -113,9 +120,9 @@
         class Spark {
             constructor(x, y) {
                 this.x = x; this.y = y;
-                this.size = Math.random() * 2 + 1;
-                this.speedX = (Math.random() - 0.5) * 3;
-                this.speedY = (Math.random() - 0.5) * 3;
+                this.size = Math.random() * 2.5 + 1;
+                this.speedX = (Math.random() - 0.5) * 3.5;
+                this.speedY = (Math.random() - 0.5) * 3.5;
                 this.life = 1;
             }
             update() { this.x += this.speedX; this.y += this.speedY; this.life -= 0.02; }
@@ -125,43 +132,41 @@
         class Particle {
             constructor(initialY) { 
                 this.x = Math.random() * w; 
-                this.y = initialY !== undefined ? initialY : h + 50; 
+                this.y = initialY !== undefined ? initialY : h + 60; 
                 this.txt = equations[Math.floor(Math.random() * equations.length)]; 
-                this.speed = 0.4 + Math.random() * 0.6; 
-                this.alpha = 0.5 + Math.random() * 0.5; 
+                this.speed = 0.5 + Math.random() * 0.7; 
+                this.alpha = 0.55 + Math.random() * 0.45; 
             }
             draw() { 
                 ctxB.font = "15px 'Courier New'"; 
                 ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`; 
                 ctxB.fillText(this.txt, this.x, this.y); 
                 this.y -= this.speed; 
-                if (this.y < -50) { this.y = h + 50; this.x = Math.random() * w; } 
+                if (this.y < -60) { this.y = h + 60; this.x = Math.random() * w; } 
             }
         }
-        // Spawn particles across the WHOLE screen initially
-        for(let i=0; i<45; i++) parts.push(new Particle(Math.random() * h));
+        
+        // HIGHER DENSITY (Increased to 65 particles)
+        for(let i=0; i<65; i++) parts.push(new Particle(Math.random() * h));
 
         function animateBg() { ctxB.clearRect(0,0,w,h); parts.forEach(p => p.draw()); requestAnimationFrame(animateBg); }
         animateBg();
 
         function drawAxis() {
-            ctxH.setLineDash([5, 5]); // Dotted line style for axis
-            ctxH.strokeStyle = "rgba(255, 255, 255, 0.3)";
-            ctxH.lineWidth = 1;
-            // X-Axis (Horizontal)
-            ctxH.beginPath(); ctxH.moveTo(w*0.1, h/2); ctxH.lineTo(w*0.9, h/2); ctxH.stroke();
-            // Y-Axis (Vertical)
-            ctxH.beginPath(); ctxH.moveTo(w/2, h*0.1); ctxH.lineTo(w/2, h*0.9); ctxH.stroke();
-            ctxH.setLineDash([]); // Reset to solid lines
+            ctxH.strokeStyle = "rgba(255, 255, 255, 0.4)";
+            ctxH.lineWidth = 1.2;
+            // SOLID STRAIGHT LINES
+            ctxH.beginPath(); ctxH.moveTo(w*0.05, h/2); ctxH.lineTo(w*0.95, h/2); ctxH.stroke();
+            ctxH.beginPath(); ctxH.moveTo(w/2, h*0.05); ctxH.lineTo(w/2, h*0.95); ctxH.stroke();
             
-            ctxH.fillStyle = "rgba(255, 255, 255, 0.5)";
-            ctxH.font = "italic 12px 'Courier New'";
-            ctxH.fillText("Time (t)", w*0.9 - 60, h/2 - 10);
-            ctxH.fillText("Affection (A)", w/2 + 10, h*0.1 + 20);
+            ctxH.fillStyle = "rgba(255, 255, 255, 0.6)";
+            ctxH.font = "italic 13px 'Courier New'";
+            ctxH.fillText("Time (t)", w*0.95 - 70, h/2 - 15);
+            ctxH.fillText("Affection (A)", w/2 + 15, h*0.05 + 25);
         }
 
         function initiate() {
-            song.volume = 0; song.play().catch(e => console.log("Music play failed"));
+            song.volume = 0; song.play();
             document.getElementById('cover-page').style.opacity = '0';
             setTimeout(() => { document.getElementById('cover-page').style.display = 'none'; startLoad(); }, 1500);
         }
@@ -172,7 +177,7 @@
             document.getElementById('loading-screen').style.display = 'flex';
             let p = 0;
             const iv = setInterval(() => {
-                p += 0.4; bar.style.width = p + '%'; pct.innerText = Math.floor(p) + "%";
+                p += 0.45; bar.style.width = p + '%'; pct.innerText = Math.floor(p) + "%";
                 if (p >= 100) { clearInterval(iv); document.getElementById('loading-screen').style.display = 'none'; startHeart(); }
             }, 20);
         }
@@ -187,13 +192,13 @@
                     let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
                     const cx = w/2 + x * scale; const cy = h/2 + y * scale;
                     pts.push({x: cx, y: cy});
-                    for(let i=0; i<3; i++) heartParticles.push(new Spark(cx, cy));
+                    for(let i=0; i<4; i++) heartParticles.push(new Spark(cx, cy));
 
                     ctxH.clearRect(0, 0, w, h);
-                    drawAxis(); // Keep Axis behind the heart
+                    drawAxis(); 
                     heartParticles.forEach((p, i) => { p.update(); p.draw(); if(p.life <= 0) heartParticles.splice(i, 1); });
 
-                    ctxH.strokeStyle = "#fff"; ctxH.lineWidth = 4; ctxH.shadowBlur = 25; ctxH.shadowColor = "#fff";
+                    ctxH.strokeStyle = "#fff"; ctxH.lineWidth = 4.5; ctxH.shadowBlur = 30; ctxH.shadowColor = "#fff";
                     ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x, p.y)); ctxH.stroke();
 
                     t += 0.0051; requestAnimationFrame(draw);
@@ -207,7 +212,7 @@
             const iv = setInterval(() => {
                 a += 0.008; ctxH.fillStyle = `rgba(255, 255, 255, ${a})`;
                 ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x, p.y)); ctxH.fill();
-                if (a >= 0.6) { 
+                if (a >= 0.65) { 
                     clearInterval(iv); 
                     document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(1)';
                 }
