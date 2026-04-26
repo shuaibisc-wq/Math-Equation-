@@ -5,66 +5,85 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>The Theorem of Us | Prova</title>
     <style>
-        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Times New Roman', serif; }
+        /* Charming Hand-written Font */
+        @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+
+        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Times New Roman', serif; color: #fff; }
         canvas { position: absolute; top: 0; left: 0; }
-        #bgCanvas { z-index: 1; opacity: 0.6; } 
+        #bgCanvas { z-index: 1; opacity: 0.65; } 
         #mainCanvas { z-index: 5; }
 
-        /* UI Elements */
-        #ui-layer { position: fixed; z-index: 20; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; pointer-events: none; }
-        .interactive { pointer-events: auto; }
-
+        /* Cover Page */
         #cover-page {
             position: fixed; z-index: 100; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: #000; color: white; transition: opacity 1.5s;
+            background: #000; transition: opacity 1s;
         }
         .btn {
-            padding: 18px 50px; border: 1px solid #fff; background: none;
+            padding: 15px 40px; border: 1.5px solid #fff; background: none;
             color: white; cursor: pointer; font-family: 'Courier New', monospace;
-            border-radius: 2px; transition: 0.5s; letter-spacing: 4px;
+            border-radius: 2px; transition: 0.5s; letter-spacing: 3px;
         }
-        .btn:hover { background: white; color: black; box-shadow: 0 0 50px #fff; }
+        .btn:hover { background: white; color: black; box-shadow: 0 0 30px #fff; }
 
-        /* Mysterious Message Button */
+        /* LOADING SCREEN - FIXED */
+        #loading-screen {
+            position: fixed; z-index: 110; width: 100%; height: 100%;
+            background: #000; display: none; flex-direction: column;
+            justify-content: center; align-items: center;
+        }
+        .bar-container { width: 300px; height: 10px; border: 1px solid #444; padding: 3px; margin-top: 20px; }
+        .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 15px #fff; transition: width 0.1s linear; }
+
+        /* Jump Button - CHARMING FONT */
+        #jump-btn-wrapper {
+            position: fixed; z-index: 70; top: 50%; left: 50%; transform: translate(-50%, -50%);
+            display: none; text-align: center; pointer-events: auto;
+        }
         #jump-btn {
-            display: none; padding: 15px 40px; background: rgba(255,255,255,0.1);
-            border: 1px solid #fff; color: #fff; cursor: pointer;
-            font-family: 'Courier New', monospace; font-size: 18px;
-            animation: pulse 2s infinite; letter-spacing: 3px;
+            background: none; border: none; color: #fff; cursor: pointer;
+            font-family: 'Great Vibes', cursive; font-size: 3rem;
+            text-shadow: 0 0 15px #fff, 0 0 5px #ffcccc;
+            animation: pulse 2s infinite; outline: none;
         }
 
-        /* Final Royal Message */
+        /* White Flash Overlay */
+        #flash { position: fixed; z-index: 150; top:0; left:0; width: 100%; height:100%; background:#fff; opacity:0; pointer-events:none; }
+
+        /* Final Message */
         #final-msg-container {
             display: none; position: fixed; z-index: 200; width: 100%; text-align: center;
             top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0;
             transition: opacity 3s;
         }
         #final-msg {
-            color: #fff; font-size: 4rem; font-style: italic; font-weight: 300;
+            color: #fff; font-size: 3.8rem; font-style: italic; font-weight: 300;
             text-shadow: 0 0 20px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.4);
-            letter-spacing: 5px;
+            letter-spacing: 4px; margin: 0;
         }
 
-        /* White Flash Overlay */
-        #flash { position: fixed; z-index: 150; top:0; left:0; width: 100%; height:100%; background:#fff; opacity:0; pointer-events:none; }
-
-        @keyframes pulse { 0%, 100% { transform: scale(1); box-shadow: 0 0 10px #fff; } 50% { transform: scale(1.1); box-shadow: 0 0 30px #fff; } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.1); opacity: 0.8; } }
     </style>
 </head>
 <body>
 
-    <audio id="mySong" src="music.mp3" loop></audio>
+    <audio id="mySong" src="music.mp3" loop preload="auto"></audio>
     <canvas id="bgCanvas"></canvas>
     <canvas id="mainCanvas"></canvas>
     <div id="flash"></div>
 
-    <div id="ui-layer">
-        <div id="cover-page">
-            <h1 style="letter-spacing: 15px; font-weight: 100; margin-bottom: 40px;">THE THEOREM OF US</h1>
-            <button class="btn interactive" onclick="initiate()">INITIATE CALCULATION</button>
-        </div>
-        <button id="jump-btn" class="interactive" onclick="startWarp()">JUMP INTO THE HEART</button>
+    <div id="cover-page">
+        <h1 style="letter-spacing: 12px; font-weight: 100; font-style: italic; margin-bottom: 50px;">THE THEOREM OF US</h1>
+        <button class="btn" onclick="initiate()">INITIATE CALCULATION</button>
+    </div>
+
+    <div id="loading-screen">
+        <div style="font-family:'Courier New'; letter-spacing:4px; font-size:12px;">LOADING SPACE MAPS...</div>
+        <div class="bar-container"><div class="bar" id="progressBar"></div></div>
+    </div>
+
+    <div id="jump-btn-wrapper">
+        <button id="jump-btn" onclick="startWarp()">Jump into the Heart</button>
     </div>
 
     <div id="final-msg-container">
@@ -78,9 +97,10 @@
         const ctxM = main.getContext('2d');
         const song = document.getElementById('mySong');
         
-        let w, h, stage = "math", stars = [], heartPts = [], t = 0;
-        const equations = ["E = mc²", "eiπ + 1 = 0", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "Rμν - 1/2 Rgμν = κTμν"];
+        let w, h, stage = "math", celestials = [], heartPts = [], t = 0;
+        const equations = ["E = mc²", "eiπ + 1 = 0", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "Rμν - 1/2 Rgμν = κTμν", "∫e^-x² dx = √π"];
         let parts = [];
+        const planetColors = ["#87CEEB", "#F4A460", "#F0E68C", "#E0FFFF", "#D3D3D3"];
 
         function resize() {
             w = bg.width = main.width = window.innerWidth;
@@ -89,128 +109,151 @@
         window.addEventListener('resize', resize);
         resize();
 
-        // Stage 1: Mathematical Background
+        // Mathematical Background Logic
         class Eq {
-            constructor() { this.x = Math.random()*w; this.y = Math.random()*h; this.s = 0.5 + Math.random(); this.txt = equations[Math.floor(Math.random()*5)]; }
+            constructor() { this.reset(); this.y = Math.random()*h; }
+            reset() { this.x = Math.random()*w; this.y = h+50; this.s = 0.5 + Math.random(); this.txt = equations[Math.floor(Math.random()*equations.length)]; }
             draw() {
                 ctxB.fillStyle = "rgba(255,255,255,0.4)";
                 ctxB.font = "14px Courier New";
                 ctxB.fillText(this.txt, this.x, this.y);
-                this.y -= this.s; if(this.y < -50) this.y = h+50;
+                this.y -= this.s; if(this.y < -50) this.reset();
             }
+        }
+        function drawGrid() {
+            ctxB.strokeStyle = "rgba(255,255,255,0.06)";
+            ctxB.lineWidth = 0.5;
+            for(let x=0; x<w; x+=50) { ctxB.beginPath(); ctxB.moveTo(x,0); ctxB.lineTo(x,h); ctxB.stroke(); }
+            for(let y=0; y<h; y+=50) { ctxB.beginPath(); ctxB.moveTo(0,y); ctxB.lineTo(w,y); ctxB.stroke(); }
         }
         for(let i=0; i<80; i++) parts.push(new Eq());
 
+        // Stage 2: Detailed Space field (Planets, Comets)
+        class Celestial {
+            constructor() {
+                this.x = Math.random()*w-w/2; this.y = Math.random()*h-h/2; this.z = Math.random()*w;
+                // Type: 0 = Star, 1 = Planet, 2 = Comet
+                this.type = Math.random() > 0.9 ? (Math.random()>0.7 ? 2 : 1) : 0;
+                this.size = this.type === 1 ? (2 + Math.random()*3) : 1; // Size multiplier
+                this.color = this.type === 1 ? planetColors[Math.floor(Math.random()*planetColors.length)] : "#fff";
+                if(this.type === 2) this.tail = Math.random()*20 + 20;
+            }
+            update(speed) {
+                this.z -= speed; if(this.z <= 0) { this.z = w; this.x = Math.random()*w-w/2; this.y = Math.random()*h-h/2; }
+            }
+            draw() {
+                let scale = w / this.z;
+                let sx = this.x * scale; let sy = this.y * scale;
+                let r = this.size * scale;
+                
+                ctxB.fillStyle = this.color;
+                ctxB.beginPath(); ctxB.arc(sx, sy, r > 10 ? 10 : (r<0.5?0.5:r), 0, Math.PI*2); ctxB.fill();
+
+                // Comet Tail and Warp Trail
+                if((this.type === 2 || stage === "warp") && this.z < w/2) {
+                    ctxB.strokeStyle = this.type === 2 ? "rgba(255,200,200,0.4)" : "rgba(255,255,255,0.3)";
+                    ctxB.lineWidth = this.type === 1 ? 2 : 1;
+                    ctxB.beginPath(); ctxB.moveTo(sx, sy);
+                    let tailLen = this.type === 2 ? this.tail : 25;
+                    let px = this.x * (w/(this.z + tailLen)); let py = this.y * (w/(this.z + tailLen));
+                    ctxB.lineTo(px, py); ctxB.stroke();
+                }
+            }
+        }
+
+        // --- Animation Loop ---
         function animate() {
-            ctxB.clearRect(0,0,w,h);
+            ctxB.fillStyle = "#000"; ctxB.fillRect(0,0,w,h);
             if(stage === "math") {
-                parts.forEach(p => p.draw());
-            } else if(stage === "warp" || stage === "final") {
-                drawStars();
+                drawGrid(); parts.forEach(p => p.draw());
+            } else if(stage === "warp") {
+                ctxB.save(); ctxB.translate(w/2, h/2);
+                celestials.forEach(c => { c.update(18); c.draw(); });
+                ctxB.restore();
+            } else if(stage === "final") {
+                ctxB.save(); ctxB.translate(w/2, h/2);
+                celestials.forEach(c => { c.update(0.3); c.draw(); });
+                ctxB.restore();
             }
             requestAnimationFrame(animate);
         }
         animate();
 
+        // 1. Loading and Cover
         function initiate() {
-            song.play();
+            song.volume = 0; song.play();
             document.getElementById('cover-page').style.opacity = '0';
-            setTimeout(() => { 
-                document.getElementById('cover-page').style.display = 'none';
-                startHeartAnim();
-            }, 1500);
+            setTimeout(() => { document.getElementById('cover-page').style.display = 'none'; startLoad(); }, 1000);
+        }
+        function startLoad() {
+            const screen = document.getElementById('loading-screen');
+            const bar = document.getElementById('progressBar');
+            screen.style.display = 'flex'; // FIXED: Shows the screen
+            let p = 0;
+            const iv = setInterval(() => {
+                p += 0.5; bar.style.width = p + '%';
+                if(p >= 100) { clearInterval(iv); screen.style.opacity = '0'; setTimeout(() => { screen.style.display = 'none'; startHeartAnim(); }, 600); }
+            }, 20);
         }
 
-        // Heart Drawing
+        // 2. Heart Phase
+        class Spark { constructor(x,y) { this.x = x; this.y = y; this.sx = (Math.random()-0.5)*3.5; this.sy = (Math.random()-0.5)*3.5; this.life = 1; } update() { this.x += this.sx; this.y += this.sy; this.life -= 0.02; } draw() { ctxM.fillStyle = `rgba(255,255,255,${this.life})`; ctxM.beginPath(); ctxM.arc(this.x,this.y,1.5,0,Math.PI*2); ctxM.fill(); } }
         function startHeartAnim() {
             const scale = Math.min(w,h)/45;
+            let sparks = [];
+            let volIn = setInterval(() => { if(song.volume < 0.8) song.volume += 0.05; else clearInterval(volIn); }, 200);
+
             const drawHeart = () => {
                 if(t <= 2 * Math.PI + 0.01) {
                     let x = 16 * Math.pow(Math.sin(t), 3);
                     let y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
-                    heartPts.push({x: w/2 + x * scale, y: h/2 + y * scale});
+                    const cx = w/2 + x * scale; const cy = h/2 + y * scale;
+                    heartPts.push({x:cx, y:cy});
+                    for(let i=0; i<3; i++) sparks.push(new Spark(cx, cy));
                     
                     ctxM.clearRect(0,0,w,h);
-                    ctxM.strokeStyle = "#fff"; ctxM.lineWidth = 4; ctxM.shadowBlur = 20; ctxM.shadowColor = "#fff";
-                    ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y);
-                    heartPts.forEach(p => ctxM.lineTo(p.x, p.y)); ctxM.stroke();
-                    t += 0.01; requestAnimationFrame(drawHeart);
-                } else {
-                    fillHeart();
-                }
+                    // FIXED: Drawing Axis
+                    ctxM.strokeStyle = "rgba(255,255,255,0.35)"; ctxM.lineWidth = 1.5;
+                    ctxM.beginPath(); ctxM.moveTo(w*0.1, h/2); ctxM.lineTo(w*0.9, h/2); ctxH.stroke();
+                    ctxM.beginPath(); ctxM.moveTo(w/2, h*0.1); ctxM.lineTo(w/2, h*0.9); ctxH.stroke();
+
+                    sparks.forEach((p,i) => { p.update(); p.draw(); if(p.life<=0) sparks.splice(i,1); });
+                    ctxM.strokeStyle = "#fff"; ctxM.lineWidth = 4.5; ctxM.shadowBlur = 25; ctxM.shadowColor = "#fff";
+                    ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y); heartPts.forEach(p => ctxM.lineTo(p.x,p.y)); ctxM.stroke();
+                    t += 0.007; requestAnimationFrame(drawHeart);
+                } else { fillHeart(); }
             };
             drawHeart();
         }
-
         function fillHeart() {
             let alpha = 0;
             const iv = setInterval(() => {
-                alpha += 0.01;
-                ctxM.fillStyle = `rgba(255,255,255,${alpha})`;
-                ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y);
-                heartPts.forEach(p => ctxM.lineTo(p.x, p.y)); ctxM.fill();
-                if(alpha >= 0.8) {
-                    clearInterval(iv);
-                    document.getElementById('jump-btn').style.display = 'block';
-                }
+                alpha += 0.01; ctxM.fillStyle = `rgba(255,255,255,${alpha})`;
+                ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y); heartPts.forEach(p => ctxM.lineTo(p.x,p.y)); ctxM.fill();
+                if(alpha >= 0.75) { clearInterval(iv); document.getElementById('jump-btn-wrapper').style.display = 'block'; }
             }, 30);
         }
 
-        // Stage 2: Hyperspace Warp
+        // 3. Galaxy Phase
         function startWarp() {
-            document.getElementById('jump-btn').style.display = 'none';
+            document.getElementById('jump-btn-wrapper').style.display = 'none';
             stage = "warp";
-            // Create Starfield
-            for(let i=0; i<400; i++) stars.push({ x: Math.random()*w-w/2, y: Math.random()*h-h/2, z: Math.random()*w, oZ: 0 });
+            // Populate Celestial Field (Planets, Stars)
+            for(let i=0; i<350; i++) celestials.push(new Celestial());
             
-            // Fade out Heart
-            let opacity = 1;
-            const fade = setInterval(() => {
-                opacity -= 0.05; main.style.opacity = opacity;
-                if(opacity <= 0) { clearInterval(fade); main.style.display = 'none'; }
-            }, 50);
-
-            // Warp Duration (8-9 seconds)
-            setTimeout(() => { triggerFlash(); }, 8500);
+            main.style.transition = 'opacity 1.5s'; main.style.opacity = '0'; // Fade out Heart Canvas
+            setTimeout(() => { triggerFlash(); }, 9000); // Duration 9 seconds
         }
 
-        function drawStars() {
-            ctxB.fillStyle = "#000"; ctxB.fillRect(0,0,w,h);
-            ctxB.save(); ctxB.translate(w/2, h/2);
-            stars.forEach(s => {
-                s.z -= (stage === "warp" ? 15 : 0.5); // Speed in warp vs final
-                if(s.z <= 0) s.z = w;
-                let sx = s.x * (w/s.z); let sy = s.y * (w/s.z);
-                let r = 1.5 * (w/s.z);
-                ctxB.fillStyle = "#fff";
-                ctxB.beginPath(); ctxB.arc(sx, sy, r > 3 ? 3 : r, 0, Math.PI*2); ctxB.fill();
-                
-                // Motion blur lines during warp
-                if(stage === "warp") {
-                    ctxB.strokeStyle = "rgba(255,255,255,0.3)"; ctxB.lineWidth = 1;
-                    ctxB.beginPath(); ctxB.moveTo(sx, sy);
-                    let px = s.x * (w/(s.z+20)); let py = s.y * (w/(s.z+20));
-                    ctxB.lineTo(px, py); ctxB.stroke();
-                }
-            });
-            ctxB.restore();
-        }
-
-        // Stage 3: Supernova Flash and Message
         function triggerFlash() {
             const flash = document.getElementById('flash');
-            flash.style.opacity = '1';
-            flash.style.transition = 'opacity 0.1s';
-            
+            flash.style.opacity = '1'; flash.style.transition = 'opacity 0.05s';
             setTimeout(() => {
                 stage = "final";
-                flash.style.opacity = '0';
-                flash.style.transition = 'opacity 4s';
-                
-                const msg = document.getElementById('final-msg-container');
-                msg.style.display = 'block';
-                setTimeout(() => { msg.style.opacity = '1'; }, 100);
-            }, 200);
+                flash.style.opacity = '0'; flash.style.transition = 'opacity 5s';
+                document.getElementById('final-msg-container').style.display = 'block';
+                setTimeout(() => { document.getElementById('final-msg-container').style.opacity = '1'; }, 100);
+            }, 100);
         }
     </script>
 </body>
