@@ -7,18 +7,18 @@
     <style>
         body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
-        #bgCanvas { z-index: 1; opacity: 0.65; } 
+        #bgCanvas { z-index: 1; opacity: 0.7; } 
         #heartCanvas { z-index: 5; }
 
         /* Cover Page */
         #cover-page {
             position: fixed; z-index: 20; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            background: #000; color: white; transition: opacity 1.5s;
+            background: #000; color: white; transition: opacity 1.2s;
         }
         h1 { font-size: 2.5rem; letter-spacing: 12px; margin-bottom: 50px; font-style: italic; font-weight: 300; text-align: center; }
         .btn {
-            padding: 18px 60px; border: 1px solid #fff; background: none;
+            padding: 18px 60px; border: 1.5px solid #fff; background: none;
             color: white; cursor: pointer; font-family: 'Courier New', monospace;
             border-radius: 2px; transition: 0.5s; letter-spacing: 4px;
         }
@@ -30,49 +30,44 @@
             background: #000; display: none; flex-direction: column;
             justify-content: center; align-items: center; color: #fff;
         }
-        .percent-text { font-family: 'Courier New'; font-size: 26px; margin-bottom: 20px; font-weight: bold; }
-        .bar-container { width: 500px; height: 24px; background: rgba(255,255,255,0.1); border: 1px solid #444; padding: 4px; }
-        .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 20px #fff; }
+        .bar-container { width: 400px; height: 15px; border: 1px solid #555; padding: 3px; margin-top: 20px; }
+        .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 15px #fff; }
 
-        /* Envelope UI */
+        /* Envelope */
         #envelope-wrapper {
             position: fixed; z-index: 50; top: 50%; left: 50%;
             transform: translate(-50%, -50%) scale(0);
-            transition: transform 1.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            cursor: pointer; display: flex; flex-direction: column; align-items: center;
+            transition: transform 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            cursor: pointer; text-align: center;
         }
-        .envelope {
-            width: 160px; height: 110px; background: #000; border: 2px solid #fff;
-            position: relative; box-shadow: 0 0 40px rgba(255,255,255,0.3);
-        }
-        .envelope::before {
-            content: ''; position: absolute; top: 0; left: 0;
-            border-left: 80px solid transparent; border-right: 80px solid transparent;
-            border-top: 55px solid #fff;
-        }
-        .heart-seal {
-            position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%);
-            color: #fff; font-size: 28px; animation: pulse 2s infinite;
-        }
+        .envelope { width: 150px; height: 100px; background: #000; border: 2px solid #fff; position: relative; }
+        .envelope::before { content: ''; position: absolute; top: 0; left: 0; border-left: 75px solid transparent; border-right: 75px solid transparent; border-top: 50px solid #fff; }
+        .heart-seal { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 25px; animation: pulse 2s infinite; }
 
-        /* Final Message - ELEGANT UPDATED */
+        /* FINAL MESSAGE - THE FIX */
+        #final-msg-container {
+            position: fixed; z-index: 100; top: 50%; left: 50%;
+            transform: translate(-50%, -50%);
+            width: 100%; text-align: center; display: none; opacity: 0;
+            transition: opacity 2s; pointer-events: none;
+        }
+        .msg-box {
+            background: rgba(0, 0, 0, 0.85); /* Solid dark background */
+            display: inline-block; padding: 40px 60px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            box-shadow: 0 0 50px #000;
+        }
         #final-msg {
-            position: fixed; z-index: 100; width: 100%; text-align: center;
-            top: 50%; left: 50%; transform: translate(-50%, -50%);
-            color: white; font-size: 3.8rem; font-family: 'Times New Roman', Times, serif; 
-            font-style: italic; opacity: 0; pointer-events: none;
-            transition: opacity 3s ease-in-out;
-            text-shadow: 0 0 15px #000, 0 0 40px #000;
-            background: rgba(0, 0, 0, 0.5); padding: 40px;
+            color: #fff; font-size: 3.5rem; font-family: 'Times New Roman', serif;
+            font-style: italic; margin: 0; text-shadow: 0 0 20px rgba(255,255,255,0.5);
         }
 
-        @keyframes pulse { 0% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.3); } 100% { transform: translate(-50%, -50%) scale(1); } }
+        @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.2); } }
     </style>
 </head>
 <body>
 
     <audio id="mySong" src="music.mp3" loop preload="auto"></audio>
-
     <canvas id="bgCanvas"></canvas>
     <canvas id="heartCanvas"></canvas>
 
@@ -82,18 +77,20 @@
     </div>
 
     <div id="loading-screen">
-        <div class="percent-text" id="percent">0%</div>
+        <div style="font-family:'Courier New'; letter-spacing:5px;">PROCESSING...</div>
         <div class="bar-container"><div class="bar" id="progressBar"></div></div>
     </div>
 
     <div id="envelope-wrapper" onclick="revealMessage()">
-        <div class="envelope">
-            <div class="heart-seal">❤</div>
-        </div>
-        <p style="color:white; font-family:'Courier New'; font-size:12px; margin-top:25px; letter-spacing:4px; font-weight:bold;">FOR MY LOVE</p>
+        <div class="envelope"><div class="heart-seal">❤</div></div>
+        <p style="color:#fff; font-family:'Courier New'; font-size:11px; margin-top:20px; letter-spacing:3px;">OPEN ENVELOPE</p>
     </div>
 
-    <div id="final-msg">Forever Yours, My Love</div>
+    <div id="final-msg-container">
+        <div class="msg-box">
+            <h2 id="final-msg">Forever Yours, My Love</h2>
+        </div>
+    </div>
 
     <script>
         const bg = document.getElementById('bgCanvas');
@@ -103,105 +100,89 @@
         const song = document.getElementById('mySong');
 
         let w, h, heartParticles = [];
-        const equations = [
-            "Rμν - 1/2 Rgμν = 8πG/c⁴ Tμν", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "eiπ + 1 = 0", 
-            "E = mc²", "∫e^-x² dx = √π", "ΔxΔp ≥ ℏ/2", "G_μν + Λg_μν = κT_μν", 
-            "∮B·dl = μ₀I", "d/dx[ln x] = 1/x", "a² + b² = c²"
-        ];
+        const equations = ["E = mc²", "F = ma", "∇×E = -∂B/∂t", "eiπ + 1 = 0", "iℏ∂/∂t Ψ = ĤΨ", "Rμν - 1/2 Rgμν = κTμν", "ΔxΔp ≥ ℏ/2", "λ = h/p"];
         let parts = [];
 
         function resize() {
             w = bg.width = heart.width = window.innerWidth;
             h = bg.height = heart.height = window.innerHeight;
+            drawGrid();
         }
         window.addEventListener('resize', resize);
-        resize();
 
-        class Spark {
-            constructor(x, y) {
-                this.x = x; this.y = y;
-                this.size = Math.random() * 2.5 + 1;
-                this.speedX = (Math.random() - 0.5) * 3.5;
-                this.speedY = (Math.random() - 0.5) * 3.5;
-                this.life = 1;
-            }
-            update() { this.x += this.speedX; this.y += this.speedY; this.life -= 0.02; }
-            draw() { ctxH.fillStyle = `rgba(255, 255, 255, ${this.life})`; ctxH.beginPath(); ctxH.arc(this.x, this.y, this.size, 0, Math.PI * 2); ctxH.fill(); }
+        // BACKGROUND GRID
+        function drawGrid() {
+            ctxB.strokeStyle = "rgba(255, 255, 255, 0.08)";
+            ctxB.lineWidth = 0.5;
+            for(let x=0; x<w; x+=40) { ctxB.beginPath(); ctxB.moveTo(x,0); ctxB.lineTo(x,h); ctxB.stroke(); }
+            for(let y=0; y<h; y+=40) { ctxB.beginPath(); ctxB.moveTo(0,y); ctxB.lineTo(w,y); ctxB.stroke(); }
         }
 
         class Particle {
-            constructor(initialY) { 
-                this.x = Math.random() * w; 
-                this.y = initialY !== undefined ? initialY : h + 60; 
-                this.txt = equations[Math.floor(Math.random() * equations.length)]; 
-                this.speed = 0.5 + Math.random() * 0.7; 
-                this.alpha = 0.55 + Math.random() * 0.45; 
-            }
-            draw() { 
-                ctxB.font = "15px 'Courier New'"; 
-                ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`; 
-                ctxB.fillText(this.txt, this.x, this.y); 
-                this.y -= this.speed; 
-                if (this.y < -60) { this.y = h + 60; this.x = Math.random() * w; } 
+            constructor(y) { this.x = Math.random() * w; this.y = y || h + 50; this.txt = equations[Math.floor(Math.random() * equations.length)]; this.speed = 0.6 + Math.random() * 0.8; this.alpha = 0.4 + Math.random() * 0.5; }
+            draw() {
+                ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
+                ctxB.font = "14px 'Courier New'";
+                ctxB.fillText(this.txt, this.x, this.y);
+                this.y -= this.speed;
+                if(this.y < -50) { this.y = h + 50; this.x = Math.random() * w; }
             }
         }
-        
-        // HIGHER DENSITY (Increased to 65 particles)
-        for(let i=0; i<65; i++) parts.push(new Particle(Math.random() * h));
 
-        function animateBg() { ctxB.clearRect(0,0,w,h); parts.forEach(p => p.draw()); requestAnimationFrame(animateBg); }
-        animateBg();
+        // DENSE EQUATIONS
+        for(let i=0; i<80; i++) parts.push(new Particle(Math.random() * h));
 
-        function drawAxis() {
-            ctxH.strokeStyle = "rgba(255, 255, 255, 0.4)";
-            ctxH.lineWidth = 1.2;
-            // SOLID STRAIGHT LINES
-            ctxH.beginPath(); ctxH.moveTo(w*0.05, h/2); ctxH.lineTo(w*0.95, h/2); ctxH.stroke();
-            ctxH.beginPath(); ctxH.moveTo(w/2, h*0.05); ctxH.lineTo(w/2, h*0.95); ctxH.stroke();
-            
-            ctxH.fillStyle = "rgba(255, 255, 255, 0.6)";
-            ctxH.font = "italic 13px 'Courier New'";
-            ctxH.fillText("Time (t)", w*0.95 - 70, h/2 - 15);
-            ctxH.fillText("Affection (A)", w/2 + 15, h*0.05 + 25);
+        function animate() {
+            ctxB.clearRect(0,0,w,h);
+            drawGrid();
+            parts.forEach(p => p.draw());
+            requestAnimationFrame(animate);
         }
+        resize(); animate();
 
         function initiate() {
             song.volume = 0; song.play();
             document.getElementById('cover-page').style.opacity = '0';
-            setTimeout(() => { document.getElementById('cover-page').style.display = 'none'; startLoad(); }, 1500);
+            setTimeout(() => { document.getElementById('cover-page').style.display = 'none'; startLoad(); }, 1200);
         }
 
         function startLoad() {
             const bar = document.getElementById('progressBar');
-            const pct = document.getElementById('percent');
-            document.getElementById('loading-screen').style.display = 'flex';
             let p = 0;
             const iv = setInterval(() => {
-                p += 0.45; bar.style.width = p + '%'; pct.innerText = Math.floor(p) + "%";
-                if (p >= 100) { clearInterval(iv); document.getElementById('loading-screen').style.display = 'none'; startHeart(); }
+                p += 0.5; bar.style.width = p + '%';
+                if(p >= 100) { clearInterval(iv); document.getElementById('loading-screen').style.display = 'none'; startHeart(); }
             }, 20);
         }
 
+        class Spark {
+            constructor(x,y) { this.x = x; this.y = y; this.sx = (Math.random()-0.5)*3; this.sy = (Math.random()-0.5)*3; this.life = 1; }
+            update() { this.x += this.sx; this.y += this.sy; this.life -= 0.02; }
+            draw() { ctxH.fillStyle = `rgba(255,255,255,${this.life})`; ctxH.beginPath(); ctxH.arc(this.x,this.y,1.5,0,Math.PI*2); ctxH.fill(); }
+        }
+
         function startHeart() {
-            let t = 0; let pts = []; const scale = Math.min(w, h) / 45;
-            let volIn = setInterval(() => { if (song.volume < 0.9) song.volume += 0.05; else clearInterval(volIn); }, 200);
+            let t = 0; let pts = []; const scale = Math.min(w,h)/45;
+            let volIn = setInterval(() => { if(song.volume < 0.8) song.volume += 0.05; else clearInterval(volIn); }, 200);
 
             function draw() {
-                if (t <= 2 * Math.PI + 0.01) {
+                if(t <= 2 * Math.PI + 0.01) {
                     let x = 16 * Math.pow(Math.sin(t), 3);
-                    let y = -(13 * Math.cos(t) - 5 * Math.cos(2*t) - 2 * Math.cos(3*t) - Math.cos(4*t));
+                    let y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
                     const cx = w/2 + x * scale; const cy = h/2 + y * scale;
-                    pts.push({x: cx, y: cy});
-                    for(let i=0; i<4; i++) heartParticles.push(new Spark(cx, cy));
+                    pts.push({x:cx, y:cy});
+                    for(let i=0; i<3; i++) heartParticles.push(new Spark(cx, cy));
+                    
+                    ctxH.clearRect(0,0,w,h);
+                    // DRAW AXIS
+                    ctxH.strokeStyle = "rgba(255,255,255,0.4)"; ctxH.lineWidth = 1.5;
+                    ctxH.beginPath(); ctxH.moveTo(w*0.1, h/2); ctxH.lineTo(w*0.9, h/2); ctxH.stroke();
+                    ctxH.beginPath(); ctxH.moveTo(w/2, h*0.1); ctxH.lineTo(w/2, h*0.9); ctxH.stroke();
 
-                    ctxH.clearRect(0, 0, w, h);
-                    drawAxis(); 
-                    heartParticles.forEach((p, i) => { p.update(); p.draw(); if(p.life <= 0) heartParticles.splice(i, 1); });
-
-                    ctxH.strokeStyle = "#fff"; ctxH.lineWidth = 4.5; ctxH.shadowBlur = 30; ctxH.shadowColor = "#fff";
-                    ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x, p.y)); ctxH.stroke();
-
-                    t += 0.0051; requestAnimationFrame(draw);
+                    heartParticles.forEach((p,i) => { p.update(); p.draw(); if(p.life<=0) heartParticles.splice(i,1); });
+                    ctxH.strokeStyle = "#fff"; ctxH.lineWidth = 4; ctxH.shadowBlur = 20; ctxH.shadowColor = "#fff";
+                    ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x,p.y)); ctxH.stroke();
+                    t += 0.005; requestAnimationFrame(draw);
                 } else { fillHeart(pts); }
             }
             draw();
@@ -210,21 +191,19 @@
         function fillHeart(pts) {
             let a = 0;
             const iv = setInterval(() => {
-                a += 0.008; ctxH.fillStyle = `rgba(255, 255, 255, ${a})`;
-                ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x, p.y)); ctxH.fill();
-                if (a >= 0.65) { 
-                    clearInterval(iv); 
-                    document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(1)';
-                }
+                a += 0.01; ctxH.fillStyle = `rgba(255,255,255,${a})`;
+                ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x,p.y)); ctxH.fill();
+                if(a >= 0.7) { clearInterval(iv); document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(1)'; }
             }, 30);
         }
 
         function revealMessage() {
             document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(0)';
             setTimeout(() => {
-                const msg = document.getElementById('final-msg');
-                msg.style.opacity = '1';
-                let volOut = setInterval(() => { if (song.volume > 0.05) song.volume -= 0.05; else { song.pause(); clearInterval(volOut); } }, 250);
+                const container = document.getElementById('final-msg-container');
+                container.style.display = 'block';
+                setTimeout(() => { container.style.opacity = '1'; }, 100);
+                let volOut = setInterval(() => { if(song.volume > 0.05) song.volume -= 0.05; else { song.pause(); clearInterval(volOut); } }, 200);
             }, 800);
         }
     </script>
