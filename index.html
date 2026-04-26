@@ -7,7 +7,7 @@
     <style>
         body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Georgia', serif; }
         canvas { position: absolute; top: 0; left: 0; }
-        #bgCanvas { z-index: 1; opacity: 0.7; } 
+        #bgCanvas { z-index: 1; opacity: 0.65; } 
         #heartCanvas { z-index: 5; }
 
         /* Cover Page */
@@ -16,22 +16,23 @@
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: #000; color: white; transition: opacity 1.2s;
         }
-        h1 { font-size: 2.5rem; letter-spacing: 12px; margin-bottom: 50px; font-style: italic; font-weight: 300; text-align: center; }
+        h1 { font-size: 2.2rem; letter-spacing: 10px; margin-bottom: 40px; text-align: center; font-style: italic; font-weight: 300; }
         .btn {
-            padding: 18px 60px; border: 1.5px solid #fff; background: none;
+            padding: 18px 50px; border: 1.5px solid #fff; background: none;
             color: white; cursor: pointer; font-family: 'Courier New', monospace;
-            border-radius: 2px; transition: 0.5s; letter-spacing: 4px;
+            border-radius: 2px; transition: 0.5s; letter-spacing: 3px;
         }
-        .btn:hover { background: white; color: black; box-shadow: 0 0 40px #fff; }
+        .btn:hover { background: white; color: black; box-shadow: 0 0 30px #fff; }
 
-        /* Loading Screen */
+        /* LOADING SCREEN - FIXED */
         #loading-screen {
             position: fixed; z-index: 30; width: 100%; height: 100%;
-            background: #000; display: none; flex-direction: column;
-            justify-content: center; align-items: center; color: #fff;
+            background: #000; display: none; /* JS will change this to flex */
+            flex-direction: column; justify-content: center; align-items: center; color: #fff;
         }
-        .bar-container { width: 400px; height: 15px; border: 1px solid #555; padding: 3px; margin-top: 20px; }
-        .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 15px #fff; }
+        .loading-title { font-family: 'Courier New'; letter-spacing: 6px; font-size: 14px; margin-bottom: 20px; }
+        .bar-container { width: 300px; height: 12px; border: 1px solid #444; padding: 3px; }
+        .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 15px #fff; transition: width 0.1s linear; }
 
         /* Envelope */
         #envelope-wrapper {
@@ -44,7 +45,7 @@
         .envelope::before { content: ''; position: absolute; top: 0; left: 0; border-left: 75px solid transparent; border-right: 75px solid transparent; border-top: 50px solid #fff; }
         .heart-seal { position: absolute; top: 60%; left: 50%; transform: translate(-50%, -50%); color: #fff; font-size: 25px; animation: pulse 2s infinite; }
 
-        /* FINAL MESSAGE - THE FIX */
+        /* MESSAGE REVEAL - IRONCLAD VISIBILITY */
         #final-msg-container {
             position: fixed; z-index: 100; top: 50%; left: 50%;
             transform: translate(-50%, -50%);
@@ -52,14 +53,14 @@
             transition: opacity 2s; pointer-events: none;
         }
         .msg-box {
-            background: rgba(0, 0, 0, 0.85); /* Solid dark background */
+            background: rgba(0, 0, 0, 0.9); /* Pure black plate */
             display: inline-block; padding: 40px 60px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            box-shadow: 0 0 50px #000;
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 60px #000;
         }
         #final-msg {
             color: #fff; font-size: 3.5rem; font-family: 'Times New Roman', serif;
-            font-style: italic; margin: 0; text-shadow: 0 0 20px rgba(255,255,255,0.5);
+            font-style: italic; margin: 0; text-shadow: 0 0 20px rgba(255,255,255,0.4);
         }
 
         @keyframes pulse { 0%, 100% { transform: translate(-50%, -50%) scale(1); } 50% { transform: translate(-50%, -50%) scale(1.2); } }
@@ -77,8 +78,9 @@
     </div>
 
     <div id="loading-screen">
-        <div style="font-family:'Courier New'; letter-spacing:5px;">PROCESSING...</div>
+        <div class="loading-title">DEDUCING CORE CONSTANTS</div>
         <div class="bar-container"><div class="bar" id="progressBar"></div></div>
+        <p id="load-p" style="font-family:'Courier New'; margin-top:10px; font-size:12px;">0%</p>
     </div>
 
     <div id="envelope-wrapper" onclick="revealMessage()">
@@ -100,26 +102,26 @@
         const song = document.getElementById('mySong');
 
         let w, h, heartParticles = [];
-        const equations = ["E = mc²", "F = ma", "∇×E = -∂B/∂t", "eiπ + 1 = 0", "iℏ∂/∂t Ψ = ĤΨ", "Rμν - 1/2 Rgμν = κTμν", "ΔxΔp ≥ ℏ/2", "λ = h/p"];
+        const equations = ["E = mc²", "∫e^-x² dx = √π", "∇×E = -∂B/∂t", "eiπ + 1 = 0", "iℏ∂/∂t Ψ = ĤΨ", "Rμν - 1/2 Rgμν = κTμν", "ΔxΔp ≥ ℏ/2", "λ = h/p", "a² + b² = c²"];
         let parts = [];
 
         function resize() {
             w = bg.width = heart.width = window.innerWidth;
             h = bg.height = heart.height = window.innerHeight;
-            drawGrid();
         }
         window.addEventListener('resize', resize);
+        resize();
 
-        // BACKGROUND GRID
+        // Background Logic: Grid + Equations
         function drawGrid() {
-            ctxB.strokeStyle = "rgba(255, 255, 255, 0.08)";
+            ctxB.strokeStyle = "rgba(255, 255, 255, 0.07)";
             ctxB.lineWidth = 0.5;
-            for(let x=0; x<w; x+=40) { ctxB.beginPath(); ctxB.moveTo(x,0); ctxB.lineTo(x,h); ctxB.stroke(); }
-            for(let y=0; y<h; y+=40) { ctxB.beginPath(); ctxB.moveTo(0,y); ctxB.lineTo(w,y); ctxB.stroke(); }
+            for(let x=0; x<w; x+=50) { ctxB.beginPath(); ctxB.moveTo(x,0); ctxB.lineTo(x,h); ctxB.stroke(); }
+            for(let y=0; y<h; y+=50) { ctxB.beginPath(); ctxB.moveTo(0,y); ctxB.lineTo(w,y); ctxB.stroke(); }
         }
 
         class Particle {
-            constructor(y) { this.x = Math.random() * w; this.y = y || h + 50; this.txt = equations[Math.floor(Math.random() * equations.length)]; this.speed = 0.6 + Math.random() * 0.8; this.alpha = 0.4 + Math.random() * 0.5; }
+            constructor(y) { this.x = Math.random() * w; this.y = y || h + 50; this.txt = equations[Math.floor(Math.random() * equations.length)]; this.speed = 0.5 + Math.random() * 0.7; this.alpha = 0.4 + Math.random() * 0.5; }
             draw() {
                 ctxB.fillStyle = `rgba(255, 255, 255, ${this.alpha})`;
                 ctxB.font = "14px 'Courier New'";
@@ -129,8 +131,8 @@
             }
         }
 
-        // DENSE EQUATIONS
-        for(let i=0; i<80; i++) parts.push(new Particle(Math.random() * h));
+        // Increase Equation Density
+        for(let i=0; i<85; i++) parts.push(new Particle(Math.random() * h));
 
         function animate() {
             ctxB.clearRect(0,0,w,h);
@@ -138,32 +140,49 @@
             parts.forEach(p => p.draw());
             requestAnimationFrame(animate);
         }
-        resize(); animate();
+        animate();
 
         function initiate() {
-            song.volume = 0; song.play();
+            song.volume = 0;
+            song.play();
             document.getElementById('cover-page').style.opacity = '0';
-            setTimeout(() => { document.getElementById('cover-page').style.display = 'none'; startLoad(); }, 1200);
+            setTimeout(() => {
+                document.getElementById('cover-page').style.display = 'none';
+                startLoad();
+            }, 1200);
         }
 
         function startLoad() {
+            const screen = document.getElementById('loading-screen');
             const bar = document.getElementById('progressBar');
+            const pText = document.getElementById('load-p');
+            screen.style.display = 'flex'; // FIXED: Shows the loading screen
+            
             let p = 0;
             const iv = setInterval(() => {
-                p += 0.5; bar.style.width = p + '%';
-                if(p >= 100) { clearInterval(iv); document.getElementById('loading-screen').style.display = 'none'; startHeart(); }
+                p += 0.6;
+                bar.style.width = p + '%';
+                pText.innerText = Math.floor(p) + "%";
+                if(p >= 100) {
+                    clearInterval(iv);
+                    screen.style.opacity = '0';
+                    setTimeout(() => {
+                        screen.style.display = 'none';
+                        startHeart();
+                    }, 500);
+                }
             }, 20);
         }
 
         class Spark {
-            constructor(x,y) { this.x = x; this.y = y; this.sx = (Math.random()-0.5)*3; this.sy = (Math.random()-0.5)*3; this.life = 1; }
+            constructor(x,y) { this.x = x; this.y = y; this.sx = (Math.random()-0.5)*3.5; this.sy = (Math.random()-0.5)*3.5; this.life = 1; }
             update() { this.x += this.sx; this.y += this.sy; this.life -= 0.02; }
             draw() { ctxH.fillStyle = `rgba(255,255,255,${this.life})`; ctxH.beginPath(); ctxH.arc(this.x,this.y,1.5,0,Math.PI*2); ctxH.fill(); }
         }
 
         function startHeart() {
             let t = 0; let pts = []; const scale = Math.min(w,h)/45;
-            let volIn = setInterval(() => { if(song.volume < 0.8) song.volume += 0.05; else clearInterval(volIn); }, 200);
+            let volIn = setInterval(() => { if(song.volume < 0.85) song.volume += 0.05; else clearInterval(volIn); }, 200);
 
             function draw() {
                 if(t <= 2 * Math.PI + 0.01) {
@@ -171,16 +190,18 @@
                     let y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
                     const cx = w/2 + x * scale; const cy = h/2 + y * scale;
                     pts.push({x:cx, y:cy});
-                    for(let i=0; i<3; i++) heartParticles.push(new Spark(cx, cy));
+                    for(let i=0; i<4; i++) heartParticles.push(new Spark(cx, cy));
                     
                     ctxH.clearRect(0,0,w,h);
-                    // DRAW AXIS
+                    
+                    // SOLID STRAIGHT AXIS
                     ctxH.strokeStyle = "rgba(255,255,255,0.4)"; ctxH.lineWidth = 1.5;
                     ctxH.beginPath(); ctxH.moveTo(w*0.1, h/2); ctxH.lineTo(w*0.9, h/2); ctxH.stroke();
                     ctxH.beginPath(); ctxH.moveTo(w/2, h*0.1); ctxH.lineTo(w/2, h*0.9); ctxH.stroke();
 
                     heartParticles.forEach((p,i) => { p.update(); p.draw(); if(p.life<=0) heartParticles.splice(i,1); });
-                    ctxH.strokeStyle = "#fff"; ctxH.lineWidth = 4; ctxH.shadowBlur = 20; ctxH.shadowColor = "#fff";
+                    
+                    ctxH.strokeStyle = "#fff"; ctxH.lineWidth = 4.5; ctxH.shadowBlur = 25; ctxH.shadowColor = "#fff";
                     ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x,p.y)); ctxH.stroke();
                     t += 0.005; requestAnimationFrame(draw);
                 } else { fillHeart(pts); }
@@ -193,7 +214,10 @@
             const iv = setInterval(() => {
                 a += 0.01; ctxH.fillStyle = `rgba(255,255,255,${a})`;
                 ctxH.beginPath(); ctxH.moveTo(pts[0].x, pts[0].y); pts.forEach(p => ctxH.lineTo(p.x,p.y)); ctxH.fill();
-                if(a >= 0.7) { clearInterval(iv); document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(1)'; }
+                if(a >= 0.7) { 
+                    clearInterval(iv); 
+                    document.getElementById('envelope-wrapper').style.transform = 'translate(-50%, -50%) scale(1)';
+                }
             }, 30);
         }
 
@@ -202,8 +226,12 @@
             setTimeout(() => {
                 const container = document.getElementById('final-msg-container');
                 container.style.display = 'block';
-                setTimeout(() => { container.style.opacity = '1'; }, 100);
-                let volOut = setInterval(() => { if(song.volume > 0.05) song.volume -= 0.05; else { song.pause(); clearInterval(volOut); } }, 200);
+                setTimeout(() => { container.style.opacity = '1'; }, 50);
+                
+                let volOut = setInterval(() => { 
+                    if(song.volume > 0.05) song.volume -= 0.05; 
+                    else { song.pause(); clearInterval(volOut); } 
+                }, 200);
             }, 800);
         }
     </script>
