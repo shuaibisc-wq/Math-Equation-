@@ -8,52 +8,89 @@
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,400&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
-        body, html { margin: 0; padding: 0; background-color: #ffcccc; color: #fff; font-family: 'Great Vibes', cursive; height: 100%; overflow: hidden; display: flex; flex-direction: column; justify-content: center; align-items: center;}
-        #story-container {
-            width: 80%; text-align: center; display: flex; flex-direction: column; justify-content: center; align-items: center; position: relative;
+        body, html { 
+            margin: 0; padding: 0; background-color: #ffcccc; color: #fff; 
+            font-family: 'Crimson Text', serif; height: 100%; overflow: hidden; 
+            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer; /* Screen-e click korar jonno pointer */
         }
-        #princess-dance { width: 100%; max-width: 600px; border-radius: 20px; box-shadow: 0 0 50px rgba(255,255,255,0.7); margin-bottom: 50px;}
-        #message-p { font-size: 3.5rem; color: #ff007f; text-shadow: 0 0 25px rgba(255,255,255,0.8); }
-        .hidden { display: none; }
-        .visible { display: block; animation: fadeIn 2s; }
+
+        #story-container {
+            width: 90%; text-align: center; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; position: relative;
+        }
+
+        #princess-dance { 
+            width: 100%; max-width: 500px; border-radius: 50%; 
+            box-shadow: 0 0 60px rgba(255,255,255,0.8); margin-bottom: 40px;
+            border: 5px solid #fff;
+        }
+
+        #message-p { 
+            font-family: 'Great Vibes', cursive; font-size: 3.8rem; 
+            color: #ff007f; text-shadow: 0 0 20px rgba(255,255,255,0.9); 
+            min-height: 100px; transition: opacity 1s;
+        }
+
+        /* The Glowing Instruction */
+        #instruction {
+            position: fixed; bottom: 30px; font-family: 'Crimson Text', serif;
+            font-style: italic; font-size: 1.2rem; letter-spacing: 3px;
+            color: #fff; text-shadow: 0 0 10px #ff007f;
+            animation: breathe 2s infinite alternate;
+            opacity: 0.8;
+        }
+
+        @keyframes breathe {
+            from { opacity: 0.3; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1.05); }
+        }
+
         @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body>
+<body onclick="showNextMessage()">
 
     <audio id="starboy" src="starboy.mp3" autoplay loop></audio>
 
     <div id="story-container">
         <img id="princess-dance" src="cinderella-dance.gif" alt="Cinderella Dance"> 
 
-        <div id="messages">
-            <p class="hidden message">Yes! My love, Yes!</p>
-            <p class="hidden message">Prova, you've made me the happiest person in the world!</p>
-            <p class="hidden message">I promise to fill every day of our life with happiness, just like in a fairytale.</p>
-            <p class="hidden message">You are my princess, and I am your starboy.</p>
-            <p class="hidden message">Together forever, in our beautiful universe.</p>
-            <p class="hidden message">I will love you always.</p>
-        </div>
-        <p id="message-p"></p>
+        <p id="message-p">Yes! My love, Yes! ❤️</p>
     </div>
 
+    <div id="instruction">Tap anywhere to hear my heart...</div>
+
     <script>
-        const messages = document.querySelectorAll('.message');
-        const messageP = document.getElementById('message-p');
+        const messages = [
+            "Yes! My love, Yes! ❤️",
+            "Prova, you've made me the happiest person in the world!",
+            "I promise to fill every day with fairytales...",
+            "You are my princess, and I am your starboy.",
+            "In every universe, I'd still choose you.",
+            "Forever isn't enough to love you. 🥺",
+            "Together forever... always yours."
+        ];
+
         let currentMessage = 0;
+        const messageP = document.getElementById('message-p');
+        const instruction = document.getElementById('instruction');
 
         function showNextMessage() {
+            currentMessage++;
             if (currentMessage < messages.length) {
-                messageP.innerText = messages[currentMessage].innerText;
-                messageP.className = 'visible';
-                currentMessage++;
+                messageP.style.opacity = 0; // Fade out effect
                 setTimeout(() => {
-                    messageP.className = 'hidden';
-                    setTimeout(showNextMessage, 500); // 0.5 sec break
-                }, 4000); // 4 seconds message
+                    messageP.innerText = messages[currentMessage];
+                    messageP.style.opacity = 1; // Fade in effect
+                }, 500);
+
+                // Last message-er por instruction hide kora
+                if(currentMessage === messages.length - 1) {
+                    instruction.style.display = 'none';
+                }
             }
         }
-        showNextMessage();
     </script>
 </body>
 </html>
