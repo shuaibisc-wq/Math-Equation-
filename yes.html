@@ -11,47 +11,50 @@
         body, html { 
             margin: 0; padding: 0; background-color: #000; height: 100%; overflow: hidden; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer;
         }
 
-        /* Full Screen Background GIF */
+        /* FULL SCREEN RECTANGULAR GIF BACKGROUND */
         #bg-gif {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: -2; opacity: 0.8;
+            border-radius: 0; /* Ensures full rectangular shape */
         }
 
-        /* Dark Overlay for Readability */
+        /* Semi-transparent dark overlay for text readability */
         #overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+            background: rgba(0, 0, 0, 0.4);
             z-index: -1;
         }
 
         #story-container {
-            width: 85%; text-align: center; z-index: 10;
+            width: 85%; text-align: center; z-index: 10; margin-bottom: 120px; /* Space for the button */
         }
 
         #message-p { 
-            font-family: 'Great Vibes', cursive; font-size: 4.5rem; 
-            color: #fff; text-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f; 
-            min-height: 150px; transition: opacity 0.8s, transform 0.8s;
+            font-family: 'Great Vibes', cursive; font-size: 4rem; 
+            color: #fff; text-shadow: 0 0 25px #ff007f, 0 0 50px #ff007f; 
+            min-height: 150px; transition: opacity 0.7s, transform 0.7s;
             line-height: 1.2;
         }
 
-        #instruction {
+        /* BIG GLOWING PRESS BUTTON OVERLAY */
+        #next-btn-overlay {
             position: fixed; bottom: 40px; font-family: 'Crimson Text', serif;
-            font-style: italic; font-size: 1.3rem; letter-spacing: 4px;
-            color: rgba(255, 255, 255, 0.8); text-shadow: 0 0 10px #000;
-            animation: breathe 2.5s infinite alternate;
+            font-style: italic; font-size: 2.5rem; letter-spacing: 5px;
+            color: #fff; background: none; border: none; cursor: pointer;
+            text-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 40px #ff007f;
+            animation: ultimateGlow 2s infinite alternate;
+            z-index: 100;
         }
 
-        @keyframes breathe {
-            from { opacity: 0.2; transform: translateY(0); }
-            to { opacity: 1; transform: translateY(-10px); }
+        @keyframes ultimateGlow {
+            from { opacity: 0.5; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px #ff007f; }
+            to { opacity: 1; text-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 0 60px #ff007f; }
         }
     </style>
 </head>
-<body onclick="showNextMessage()">
+<body>
 
     <audio id="starboy" src="starboy.mp3" autoplay loop></audio>
 
@@ -62,12 +65,12 @@
         <p id="message-p">Yes! My love, Yes! ❤️</p>
     </div>
 
-    <div id="instruction">Tap anywhere to unveil my soul...</div>
+    <button id="next-btn-overlay" onclick="showNextMessage()">Tap to read more...</button>
 
     <script>
         const messages = [
             "Yes! My love, Yes! ❤️",
-            "Prova, you've made me the happiest person in the world!",
+            "Prova, you've made me the happiest person!",
             "I promise to fill every day with fairytales...",
             "You are my princess, and I am your starboy.",
             "In every universe, I'd still choose you.",
@@ -77,7 +80,7 @@
 
         let currentMessage = 0;
         const messageP = document.getElementById('message-p');
-        const instruction = document.getElementById('instruction');
+        const nextBtn = document.getElementById('next-btn-overlay');
 
         function showNextMessage() {
             currentMessage++;
@@ -89,11 +92,11 @@
                     messageP.innerText = messages[currentMessage];
                     messageP.style.opacity = 1;
                     messageP.style.transform = "scale(1)";
-                }, 800);
+                }, 700);
 
+                // Hide button after the last message
                 if(currentMessage === messages.length - 1) {
-                    instruction.style.animation = "none";
-                    instruction.innerText = "The End of the Beginning... ❤️";
+                    nextBtn.style.display = 'none';
                 }
             }
         }
