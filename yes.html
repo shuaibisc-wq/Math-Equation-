@@ -8,49 +8,63 @@
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,400&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
         body, html { 
-            margin: 0; padding: 0; background-color: #000; height: 100%; overflow: hidden; 
+            width: 100%; height: 100%; overflow: hidden; 
+            background-color: #000; /* Fallback */
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
-        /* FULL SCREEN RECTANGULAR GIF BACKGROUND */
-        #bg-gif {
+        /* GIF BACKGROUND - NO MARGINS, FULL RECTANGLE */
+        .bg-wrapper {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            object-fit: cover; z-index: -2; opacity: 0.8;
-            border-radius: 0; /* Ensures full rectangular shape */
+            z-index: -2;
         }
 
-        /* Semi-transparent dark overlay for text readability */
-        #overlay {
+        #bg-gif {
+            width: 100%; height: 100%; object-fit: cover;
+            display: block; opacity: 0.9;
+        }
+
+        /* DARK TINT TO MAKE TEXT POP */
+        .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4);
+            background: rgba(0, 0, 0, 0.4); 
             z-index: -1;
         }
 
         #story-container {
-            width: 85%; text-align: center; z-index: 10; margin-bottom: 120px; /* Space for the button */
+            width: 85%; text-align: center; z-index: 10;
         }
 
         #message-p { 
             font-family: 'Great Vibes', cursive; font-size: 4rem; 
             color: #fff; text-shadow: 0 0 25px #ff007f, 0 0 50px #ff007f; 
-            min-height: 150px; transition: opacity 0.7s, transform 0.7s;
-            line-height: 1.2;
+            min-height: 160px; transition: opacity 0.6s ease;
+            line-height: 1.3;
         }
 
-        /* BIG GLOWING PRESS BUTTON OVERLAY */
-        #next-btn-overlay {
-            position: fixed; bottom: 40px; font-family: 'Crimson Text', serif;
-            font-style: italic; font-size: 2.5rem; letter-spacing: 5px;
-            color: #fff; background: none; border: none; cursor: pointer;
-            text-shadow: 0 0 20px rgba(255, 255, 255, 1), 0 0 40px #ff007f;
-            animation: ultimateGlow 2s infinite alternate;
-            z-index: 100;
+        /* BIG BUTTON AT BOTTOM */
+        #next-btn {
+            position: fixed; bottom: 50px; 
+            background: none; border: none;
+            color: #fff; font-family: 'Crimson Text', serif;
+            font-style: italic; font-size: 2.2rem; cursor: pointer;
+            text-shadow: 0 0 15px #fff, 0 0 30px #ff007f;
+            animation: pulseGlow 1.5s infinite alternate;
+            z-index: 100; letter-spacing: 3px;
         }
 
-        @keyframes ultimateGlow {
-            from { opacity: 0.5; text-shadow: 0 0 20px rgba(255, 255, 255, 0.8), 0 0 40px #ff007f; }
-            to { opacity: 1; text-shadow: 0 0 30px rgba(255, 255, 255, 1), 0 0 60px #ff007f; }
+        @keyframes pulseGlow {
+            from { opacity: 0.6; transform: scale(1); }
+            to { opacity: 1; transform: scale(1.1); }
+        }
+
+        /* Responsive font for mobile */
+        @media (max-width: 600px) {
+            #message-p { font-size: 2.8rem; }
+            #next-btn { font-size: 1.8rem; }
         }
     </style>
 </head>
@@ -58,14 +72,16 @@
 
     <audio id="starboy" src="starboy.mp3" autoplay loop></audio>
 
-    <img id="bg-gif" src="cinderella-dance.gif" alt="Cinderella Dance">
-    <div id="overlay"></div>
+    <div class="bg-wrapper">
+        <img id="bg-gif" src="cinderella-dance.gif" alt="Fairytale Background">
+    </div>
+    <div class="overlay"></div>
 
     <div id="story-container">
         <p id="message-p">Yes! My love, Yes! ❤️</p>
     </div>
 
-    <button id="next-btn-overlay" onclick="showNextMessage()">Tap to read more...</button>
+    <button id="next-btn" onclick="showNextMessage()">Tap to unveil my heart...</button>
 
     <script>
         const messages = [
@@ -80,23 +96,22 @@
 
         let currentMessage = 0;
         const messageP = document.getElementById('message-p');
-        const nextBtn = document.getElementById('next-btn-overlay');
+        const nextBtn = document.getElementById('next-btn');
 
         function showNextMessage() {
             currentMessage++;
             if (currentMessage < messages.length) {
                 messageP.style.opacity = 0;
-                messageP.style.transform = "scale(0.9)";
                 
                 setTimeout(() => {
                     messageP.innerText = messages[currentMessage];
                     messageP.style.opacity = 1;
-                    messageP.style.transform = "scale(1)";
-                }, 700);
+                }, 600);
 
-                // Hide button after the last message
                 if(currentMessage === messages.length - 1) {
                     nextBtn.style.display = 'none';
+                    // Final touch: slightly brighten the GIF at the end
+                    document.getElementById('bg-gif').style.opacity = '1';
                 }
             }
         }
