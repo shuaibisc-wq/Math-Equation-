@@ -6,6 +6,7 @@
     <title>The Theorem of Us | Prova</title>
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,400;1,600&display=swap');
 
         body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; color: #fff; font-family: 'Times New Roman', serif; }
         canvas { position: absolute; top: 0; left: 0; }
@@ -54,9 +55,38 @@
         #final-msg {
             color: #fff; font-size: 3.8rem; font-style: italic; font-weight: 300;
             text-shadow: 0 0 30px rgba(255,255,255,0.8); letter-spacing: 5px;
+            margin-bottom: 30px;
         }
 
+        #will-you-be-mine-container {
+            display: none; position: fixed; z-index: 185; width: 100%; text-align: center;
+            top: 50%; left: 50%; transform: translate(-50%, -50%); opacity: 0;
+            transition: opacity 4s;
+        }
+        #will-you-be-mine {
+            color: #fff; font-size: 4rem; font-family: 'Crimson Text', serif;
+            font-style: italic; font-weight: 600;
+            text-shadow: 0 0 25px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.6);
+            letter-spacing: 2px;
+            animation: shining 3s infinite alternate;
+        }
+
+        #interaction-container {
+            display: none; position: fixed; z-index: 190; width: 100%; text-align: center;
+            bottom: 10%; left: 50%; transform: translateX(-50%);
+        }
+        .interact-btn {
+            padding: 15px 40px; border: 2px solid #fff; background: none;
+            color: white; cursor: pointer; font-family: 'Great Vibes', cursive;
+            font-size: 2.2rem; border-radius: 5px; transition: 0.5s;
+            margin: 0 20px;
+            text-shadow: 0 0 15px #fff, 0 0 5px #ffcccc;
+        }
+        #yes-btn:hover { background: #ffcc00; color: black; box-shadow: 0 0 30px #ffcc00; }
+        #no-btn:hover { background: #ff4d4d; color: black; box-shadow: 0 0 30px #ff4d4d; }
+
         @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.05); } }
+        @keyframes shining { 0% { text-shadow: 0 0 25px rgba(255,255,255,0.8), 0 0 40px rgba(255,255,255,0.6); } 100% { text-shadow: 0 0 40px rgba(255,255,255,1), 0 0 60px rgba(255,255,255,0.8); } }
     </style>
 </head>
 <body>
@@ -85,6 +115,15 @@
         <h2 id="final-msg">Forever Yours, My Love</h2>
     </div>
 
+    <div id="will-you-be-mine-container">
+        <h2 id="will-you-be-mine">Will you be mine forever 🥺?</h2>
+    </div>
+
+    <div id="interaction-container">
+        <button id="yes-btn" class="interact-btn" onclick="sayYes()">YES</button>
+        <button id="no-btn" class="interact-btn" onclick="sayNo()">NO</button>
+    </div>
+
     <script>
         const bg = document.getElementById('bgCanvas');
         const main = document.getElementById('mainCanvas');
@@ -94,6 +133,7 @@
         
         let w, h, stage = "math", celestials = [], heartPts = [], t = 0;
         let heartOpenFactor = 0;
+        let heartScaleFactor = 1; // For the heart enlarging effect
         const equations = ["E = mc²", "eiπ + 1 = 0", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "Rμν - 1/2 Rgμν = κTμν", "F = G(m1m2/r²)", "ΔxΔp ≥ ℏ/2"];
         let parts = [];
         let interactionStars = [];
@@ -120,9 +160,9 @@
         function drawWorld() {
             ctxB.fillStyle = "#000"; ctxB.fillRect(0,0,w,h);
             if(stage === "math") {
-                // Clearer and Finer Grid
-                ctxB.strokeStyle = "rgba(255,255,255,0.12)";
-                ctxB.lineWidth = 0.5;
+                // Finer Grid and Clearer Axis for Prova
+                ctxB.strokeStyle = "rgba(255,255,255,0.2)"; // More visible lines
+                ctxB.lineWidth = 0.7; // Slightly thicker for clarity
                 for(let i=0; i<w; i+=30) { ctxB.beginPath(); ctxB.moveTo(i,0); ctxB.lineTo(i,h); ctxB.stroke(); }
                 for(let i=0; i<h; i+=30) { ctxB.beginPath(); ctxB.moveTo(0,i); ctxB.lineTo(w,i); ctxB.stroke(); }
                 parts.forEach(p => p.draw());
@@ -197,7 +237,6 @@
         function startHeartAnim() {
             const scale = Math.min(w,h)/42;
             const drawH = () => {
-                // Slower t increment (0.007 instead of 0.012)
                 if(t <= 2 * Math.PI + 0.02) {
                     let x = 16 * Math.pow(Math.sin(t), 3);
                     let y = -(13*Math.cos(t) - 5*Math.cos(2*t) - 2*Math.cos(3*t) - Math.cos(4*t));
@@ -205,7 +244,8 @@
                     ctxM.clearRect(0,0,w,h);
                     
                     // CLEARER AXIS
-                    ctxM.strokeStyle = "rgba(255,255,255,0.5)"; ctxM.lineWidth = 1.2;
+                    ctxM.strokeStyle = "rgba(255,255,255,0.7)"; // More visible axis
+                    ctxM.lineWidth = 1.2;
                     ctxM.beginPath(); ctxM.moveTo(0, h/2); ctxM.lineTo(w, h/2); ctxM.stroke();
                     ctxM.beginPath(); ctxM.moveTo(w/2, 0); ctxM.lineTo(w/2, h); ctxM.stroke();
                     
@@ -214,7 +254,7 @@
                     ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y);
                     heartPts.forEach(p => ctxM.lineTo(p.x, p.y)); ctxM.stroke();
                     
-                    t += 0.0065; // SLOWER SPEED
+                    t += 0.0065; 
                     requestAnimationFrame(drawH);
                 } else {
                     let a = 0;
@@ -233,18 +273,24 @@
             document.getElementById('jump-btn-wrapper').style.display = 'none';
             for(let i=0; i<380; i++) celestials.push(new Celestial());
             
-            const openDoor = () => {
-                heartOpenFactor += 18;
+            const enlargeHeart = () => {
+                heartScaleFactor *= 1.05; // Continuously enlarge heart
                 ctxM.clearRect(0,0,w,h);
                 ctxM.save();
-                ctxM.save(); ctxM.translate(-heartOpenFactor, 0); ctxM.beginPath(); ctxM.rect(0,0,w/2,h); ctxM.clip();
-                drawH_Static(); ctxM.restore();
-                ctxM.save(); ctxM.translate(heartOpenFactor, 0); ctxM.beginPath(); ctxM.rect(w/2,0,w/2,h); ctxM.clip();
-                drawH_Static(); ctxM.restore();
+                ctxM.translate(w/2, h/2); // Move origin to center
+                ctxM.scale(heartScaleFactor, heartScaleFactor); // Enlarge everything
+                ctxM.translate(-w/2, -h/2); // Move origin back
+
+                drawH_Static(); // Draw the full heart but now enlarged and clipped
+
                 ctxM.restore();
 
-                if(heartOpenFactor < w/2 + 200) requestAnimationFrame(openDoor);
-                else {
+                // Check if heart has grown significantly
+                if(heartScaleFactor < 150) { // Keep enlarging until we pass through
+                    requestAnimationFrame(enlargeHeart);
+                } else {
+                    // Enter warp phase as heart has grown past screen
+                    ctxM.clearRect(0,0,w,h);
                     stage = "warp";
                     setTimeout(() => {
                         const f = document.getElementById('flash');
@@ -253,17 +299,54 @@
                             stage = "final"; f.style.opacity = '0';
                             document.getElementById('final-msg-container').style.display = 'block';
                             setTimeout(() => document.getElementById('final-msg-container').style.opacity = '1', 100);
+                            
+                            // Start "Will you be mine" logic after "Forever Yours"
+                            setTimeout(() => {
+                                document.getElementById('final-msg-container').style.opacity = '0';
+                                setTimeout(() => {
+                                    document.getElementById('final-msg-container').style.display = 'none';
+                                    showTheQuestion();
+                                }, 3000);
+                            }, 5000);
                         }, 150);
                     }, 8500);
                 }
             };
-            openDoor();
+            enlargeHeart();
         }
 
         function drawH_Static() {
             ctxM.fillStyle = "#fff";
             ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y);
             heartPts.forEach(p => ctxM.lineTo(p.x, p.y)); ctxM.fill();
+        }
+
+        function showTheQuestion() {
+            const question = document.getElementById('will-you-be-mine-container');
+            question.style.display = 'block';
+            setTimeout(() => { question.style.opacity = '1'; }, 100);
+            
+            // Show interaction after a short pause
+            setTimeout(() => {
+                const interaction = document.getElementById('interaction-container');
+                interaction.style.display = 'block';
+            }, 6000);
+        }
+
+        function sayNo() {
+            song.pause(); // Stop music
+            document.getElementById('loading-screen').style.display = 'none';
+            document.getElementById('cover-page').style.display = 'none';
+            document.getElementById('mainCanvas').style.display = 'none';
+            document.getElementById('bgCanvas').style.display = 'none';
+            document.getElementById('final-msg-container').style.display = 'none';
+            document.getElementById('will-you-be-mine-container').style.display = 'none';
+            document.getElementById('interaction-container').style.display = 'none';
+            document.body.style.backgroundColor = '#000'; // Make everything black
+        }
+
+        function sayYes() {
+            window.location.href = 'yes.html'; // Redirect to the "YES" stage page
         }
     </script>
 </body>
