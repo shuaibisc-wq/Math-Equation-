@@ -9,57 +9,60 @@
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
         body, html { 
-            margin: 0; padding: 0; background-color: #ffcccc; color: #fff; 
-            font-family: 'Crimson Text', serif; height: 100%; overflow: hidden; 
+            margin: 0; padding: 0; background-color: #000; height: 100%; overflow: hidden; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; /* Screen-e click korar jonno pointer */
+            cursor: pointer;
+        }
+
+        /* Full Screen Background GIF */
+        #bg-gif {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            object-fit: cover; z-index: -2; opacity: 0.8;
+        }
+
+        /* Dark Overlay for Readability */
+        #overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: radial-gradient(circle, rgba(0,0,0,0.2) 0%, rgba(0,0,0,0.6) 100%);
+            z-index: -1;
         }
 
         #story-container {
-            width: 90%; text-align: center; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; position: relative;
-        }
-
-        #princess-dance { 
-            width: 100%; max-width: 500px; border-radius: 50%; 
-            box-shadow: 0 0 60px rgba(255,255,255,0.8); margin-bottom: 40px;
-            border: 5px solid #fff;
+            width: 85%; text-align: center; z-index: 10;
         }
 
         #message-p { 
-            font-family: 'Great Vibes', cursive; font-size: 3.8rem; 
-            color: #ff007f; text-shadow: 0 0 20px rgba(255,255,255,0.9); 
-            min-height: 100px; transition: opacity 1s;
+            font-family: 'Great Vibes', cursive; font-size: 4.5rem; 
+            color: #fff; text-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f; 
+            min-height: 150px; transition: opacity 0.8s, transform 0.8s;
+            line-height: 1.2;
         }
 
-        /* The Glowing Instruction */
         #instruction {
-            position: fixed; bottom: 30px; font-family: 'Crimson Text', serif;
-            font-style: italic; font-size: 1.2rem; letter-spacing: 3px;
-            color: #fff; text-shadow: 0 0 10px #ff007f;
-            animation: breathe 2s infinite alternate;
-            opacity: 0.8;
+            position: fixed; bottom: 40px; font-family: 'Crimson Text', serif;
+            font-style: italic; font-size: 1.3rem; letter-spacing: 4px;
+            color: rgba(255, 255, 255, 0.8); text-shadow: 0 0 10px #000;
+            animation: breathe 2.5s infinite alternate;
         }
 
         @keyframes breathe {
-            from { opacity: 0.3; transform: scale(0.95); }
-            to { opacity: 1; transform: scale(1.05); }
+            from { opacity: 0.2; transform: translateY(0); }
+            to { opacity: 1; transform: translateY(-10px); }
         }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body onclick="showNextMessage()">
 
     <audio id="starboy" src="starboy.mp3" autoplay loop></audio>
 
-    <div id="story-container">
-        <img id="princess-dance" src="cinderella-dance.gif" alt="Cinderella Dance"> 
+    <img id="bg-gif" src="cinderella-dance.gif" alt="Cinderella Dance">
+    <div id="overlay"></div>
 
+    <div id="story-container">
         <p id="message-p">Yes! My love, Yes! ❤️</p>
     </div>
 
-    <div id="instruction">Tap anywhere to hear my heart...</div>
+    <div id="instruction">Tap anywhere to unveil my soul...</div>
 
     <script>
         const messages = [
@@ -69,7 +72,7 @@
             "You are my princess, and I am your starboy.",
             "In every universe, I'd still choose you.",
             "Forever isn't enough to love you. 🥺",
-            "Together forever... always yours."
+            "Together forever... always yours, Shuaib."
         ];
 
         let currentMessage = 0;
@@ -79,15 +82,18 @@
         function showNextMessage() {
             currentMessage++;
             if (currentMessage < messages.length) {
-                messageP.style.opacity = 0; // Fade out effect
+                messageP.style.opacity = 0;
+                messageP.style.transform = "scale(0.9)";
+                
                 setTimeout(() => {
                     messageP.innerText = messages[currentMessage];
-                    messageP.style.opacity = 1; // Fade in effect
-                }, 500);
+                    messageP.style.opacity = 1;
+                    messageP.style.transform = "scale(1)";
+                }, 800);
 
-                // Last message-er por instruction hide kora
                 if(currentMessage === messages.length - 1) {
-                    instruction.style.display = 'none';
+                    instruction.style.animation = "none";
+                    instruction.innerText = "The End of the Beginning... ❤️";
                 }
             }
         }
