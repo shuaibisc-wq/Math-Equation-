@@ -7,39 +7,33 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
-        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; font-family: 'Times New Roman', serif; color: #fff; }
+        body, html { margin: 0; padding: 0; overflow: hidden; background-color: #000; color: #fff; font-family: 'Times New Roman', serif; }
         canvas { position: absolute; top: 0; left: 0; }
         #bgCanvas { z-index: 1; opacity: 0.7; } 
-        #mainCanvas { z-index: 5; opacity: 1; }
+        #mainCanvas { z-index: 5; }
 
+        /* Initial UI */
         #cover-page {
             position: fixed; z-index: 100; width: 100%; height: 100%;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
             background: #000; transition: opacity 1s;
         }
         .btn {
-            padding: 15px 45px; border: 1.5px solid #fff; background: none;
+            padding: 15px 45px; border: 1px solid #fff; background: none;
             color: white; cursor: pointer; font-family: 'Courier New', monospace;
             border-radius: 2px; transition: 0.5s; letter-spacing: 3px;
         }
         .btn:hover { background: white; color: black; box-shadow: 0 0 30px #fff; }
 
-        #loading-screen {
-            position: fixed; z-index: 110; width: 100%; height: 100%;
-            background: #000; display: none; flex-direction: column;
-            justify-content: center; align-items: center;
-        }
-        .bar-container { width: 300px; height: 8px; border: 1px solid #444; padding: 3px; margin-top: 20px; }
-        .bar { width: 0%; height: 100%; background: #fff; box-shadow: 0 0 15px #fff; }
-
+        /* Jump Button - Elegant & Visible */
         #jump-btn-wrapper {
             position: fixed; z-index: 70; top: 50%; left: 50%; transform: translate(-50%, -50%);
             display: none; text-align: center;
         }
         #jump-btn {
-            background: none; border: none; color: #fff; cursor: pointer;
-            font-family: 'Great Vibes', cursive; font-size: 3.5rem;
-            text-shadow: 0 0 20px #fff; animation: pulse 2s infinite;
+            background: none; border: none; color: #ffcc00; /* Gold color for visibility */
+            cursor: pointer; font-family: 'Great Vibes', cursive; font-size: 4rem;
+            text-shadow: 0 0 25px rgba(255, 204, 0, 0.6); animation: pulse 2s infinite;
         }
 
         #flash { position: fixed; z-index: 150; top:0; left:0; width: 100%; height:100%; background:#fff; opacity:0; pointer-events:none; }
@@ -50,11 +44,11 @@
             transition: opacity 3s;
         }
         #final-msg {
-            color: #fff; font-size: 4rem; font-style: italic; font-weight: 300;
-            text-shadow: 0 0 25px rgba(255,255,255,0.8); letter-spacing: 5px;
+            color: #fff; font-size: 4.2rem; font-style: italic; font-weight: 300;
+            text-shadow: 0 0 30px rgba(255,255,255,0.8); letter-spacing: 6px;
         }
 
-        @keyframes pulse { 0%, 100% { transform: scale(1); } 50% { transform: scale(1.1); } }
+        @keyframes pulse { 0%, 100% { transform: scale(1); opacity: 1; } 50% { transform: scale(1.05); opacity: 0.8; } }
     </style>
 </head>
 <body>
@@ -65,13 +59,8 @@
     <div id="flash"></div>
 
     <div id="cover-page">
-        <h1 style="letter-spacing: 12px; font-weight: 100; font-style: italic; margin-bottom: 40px;">THE THEOREM OF US</h1>
-        <button class="btn" onclick="initiate()">INITIATE CALCULATION</button>
-    </div>
-
-    <div id="loading-screen">
-        <div style="font-family:'Courier New'; letter-spacing:4px; font-size:12px;">LOADING SPACE MAPS...</div>
-        <div class="bar-container"><div class="bar" id="progressBar"></div></div>
+        <h1 style="letter-spacing: 15px; font-weight: 100; font-style: italic; margin-bottom: 40px;">THE THEOREM OF US</h1>
+        <button class="btn" onclick="initiate()">START JOURNEY</button>
     </div>
 
     <div id="jump-btn-wrapper">
@@ -90,9 +79,9 @@
         const song = document.getElementById('mySong');
         
         let w, h, stage = "math", celestials = [], heartPts = [], t = 0;
-        const equations = ["E = mc²", "eiπ + 1 = 0", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "Rμν - 1/2 Rgμν = κTμν"];
+        let heartOpenFactor = 0; // For the door opening effect
+        const equations = ["E = mc²", "eiπ + 1 = 0", "∇×E = -∂B/∂t", "iℏ∂/∂t Ψ = ĤΨ", "Rμν - 1/2 Rgμν = κTμν", "F = G(m1m2/r²)", "ΔxΔp ≥ ℏ/2", "λ = h/mv"];
         let parts = [];
-        const planetColors = ["#add8e6", "#f4a460", "#fff5ee", "#d8bfd8", "#708090"];
 
         function resize() {
             w = bg.width = main.width = window.innerWidth;
@@ -101,79 +90,83 @@
         window.addEventListener('resize', resize);
         resize();
 
+        // Background Math & Grid
         class Eq {
-            constructor() { this.x = Math.random()*w; this.y = Math.random()*h; this.s = 0.5 + Math.random(); this.txt = equations[Math.floor(Math.random()*5)]; }
+            constructor() { this.x = Math.random()*w; this.y = Math.random()*h; this.s = 0.4 + Math.random()*0.8; this.txt = equations[Math.floor(Math.random()*equations.length)]; }
             draw() {
-                ctxB.fillStyle = "rgba(255,255,255,0.4)";
-                ctxB.font = "14px Courier New";
+                ctxB.fillStyle = "rgba(255,255,255,0.35)";
+                ctxB.font = "13px Courier New";
                 ctxB.fillText(this.txt, this.x, this.y);
                 this.y -= this.s; if(this.y < -50) this.y = h+50;
             }
         }
-        for(let i=0; i<80; i++) parts.push(new Eq());
-
-        class Celestial {
-            constructor() {
-                this.x = Math.random()*w-w/2; this.y = Math.random()*h-h/2; this.z = Math.random()*w;
-                this.type = Math.random() > 0.85 ? (Math.random()>0.7 ? 2 : 1) : 0;
-                this.size = this.type === 1 ? (2 + Math.random()*4) : (this.type === 2 ? 1.5 : 1);
-                this.color = this.type === 1 ? planetColors[Math.floor(Math.random()*5)] : "#fff";
-                this.tailLen = Math.random()*30 + 30;
-            }
-            update(speed) {
-                this.z -= speed; if(this.z <= 0) { this.z = w; this.x = Math.random()*w-w/2; this.y = Math.random()*h-h/2; }
-            }
-            draw() {
-                let scale = w / this.z;
-                let sx = this.x * scale; let sy = this.y * scale;
-                let r = this.size * scale;
-                ctxB.fillStyle = this.color;
-                ctxB.beginPath(); ctxB.arc(sx, sy, r > 12 ? 12 : r, 0, Math.PI*2); ctxB.fill();
-                if(stage === "warp" || this.type === 2) {
-                    ctxB.strokeStyle = this.type === 2 ? "rgba(255,220,200,0.4)" : "rgba(255,255,255,0.2)";
-                    ctxB.beginPath(); ctxB.moveTo(sx, sy);
-                    let px = this.x * (w/(this.z + (this.type===2?this.tailLen:30)));
-                    let py = this.y * (w/(this.z + (this.type===2?this.tailLen:30)));
-                    ctxB.lineTo(px, py); ctxB.stroke();
-                }
-            }
-        }
+        for(let i=0; i<120; i++) parts.push(new Eq()); // Increased density
 
         function drawWorld() {
             ctxB.fillStyle = "#000"; ctxB.fillRect(0,0,w,h);
             if(stage === "math") {
-                ctxB.strokeStyle = "rgba(255,255,255,0.06)";
-                for(let i=0; i<w; i+=50) { ctxB.beginPath(); ctxB.moveTo(i,0); ctxB.lineTo(i,h); ctxB.stroke(); }
-                for(let i=0; i<h; i+=50) { ctxB.beginPath(); ctxB.moveTo(0,i); ctxB.lineTo(w,i); ctxB.stroke(); }
+                // Dense Small Grid
+                ctxB.strokeStyle = "rgba(255,255,255,0.08)";
+                ctxB.lineWidth = 0.5;
+                for(let i=0; i<w; i+=30) { ctxB.beginPath(); ctxB.moveTo(i,0); ctxB.lineTo(i,h); ctxB.stroke(); }
+                for(let i=0; i<h; i+=30) { ctxB.beginPath(); ctxB.moveTo(0,i); ctxB.lineTo(w,i); ctxB.stroke(); }
                 parts.forEach(p => p.draw());
             } else {
                 ctxB.save(); ctxB.translate(w/2, h/2);
-                celestials.forEach(c => { c.update(stage==="warp"?20:0.4); c.draw(); });
+                celestials.forEach(c => { c.update(stage==="warp"?12:0.3); c.draw(); });
                 ctxB.restore();
             }
             requestAnimationFrame(drawWorld);
         }
         drawWorld();
 
-        function initiate() {
-            song.play();
-            document.getElementById('cover-page').style.opacity = '0';
-            setTimeout(() => { document.getElementById('cover-page').style.display = 'none'; startLoad(); }, 1000);
+        // Realistic Celestials
+        class Celestial {
+            constructor() {
+                this.reset();
+                this.z = Math.random()*w;
+            }
+            reset() {
+                this.x = Math.random()*w-w/2; this.y = Math.random()*h-h/2; this.z = w;
+                let r = Math.random();
+                this.type = r > 0.92 ? "planet" : (r > 0.85 ? "comet" : (r > 0.80 ? "meteor" : "star"));
+                this.size = this.type === "planet" ? (3+Math.random()*5) : 1;
+                this.color = this.type === "planet" ? `hsl(${Math.random()*360}, 40%, 70%)` : "#fff";
+                this.speedMult = this.type === "meteor" ? 2.5 : 1;
+            }
+            update(speed) {
+                this.z -= speed * this.speedMult;
+                if(this.z <= 0) this.reset();
+            }
+            draw() {
+                let scale = w / this.z;
+                let sx = this.x * scale; let sy = this.y * scale;
+                let r = this.size * scale;
+                ctxB.fillStyle = this.color;
+                ctxB.beginPath(); ctxB.arc(sx, sy, r > 15 ? 15 : r, 0, Math.PI*2); ctxB.fill();
+                
+                // Tail for Comet/Meteor/Warp
+                if(this.type === "comet" || this.type === "meteor" || stage === "warp") {
+                    ctxB.strokeStyle = this.type === "meteor" ? "rgba(255,255,255,0.6)" : "rgba(200,220,255,0.3)";
+                    ctxB.beginPath(); ctxB.moveTo(sx, sy);
+                    let tail = this.type === "meteor" ? 60 : 30;
+                    ctxB.lineTo(this.x * (w/(this.z+tail)), this.y * (w/(this.z+tail)));
+                    ctxB.stroke();
+                }
+            }
         }
 
-        function startLoad() {
-            const screen = document.getElementById('loading-screen');
-            const bar = document.getElementById('progressBar');
-            screen.style.display = 'flex';
-            let p = 0;
-            const iv = setInterval(() => {
-                p += 0.8; bar.style.width = p + '%';
-                if(p >= 100) { clearInterval(iv); screen.style.opacity = '0'; setTimeout(() => { screen.style.display = 'none'; startHeart(); }, 500); }
-            }, 30);
+        function initiate() {
+            document.getElementById('cover-page').style.opacity = '0';
+            setTimeout(() => { 
+                document.getElementById('cover-page').style.display = 'none'; 
+                song.play(); // Music starts with drawing
+                startHeart(); 
+            }, 1000);
         }
 
         function startHeart() {
-            const scale = Math.min(w,h)/45;
+            const scale = Math.min(w,h)/42;
             const drawH = () => {
                 if(t <= 2 * Math.PI + 0.02) {
                     let x = 16 * Math.pow(Math.sin(t), 3);
@@ -181,23 +174,23 @@
                     heartPts.push({x: w/2 + x * scale, y: h/2 + y * scale});
                     ctxM.clearRect(0,0,w,h);
                     
-                    // AXIS
-                    ctxM.strokeStyle = "rgba(255,255,255,0.3)"; ctxM.lineWidth = 1.5;
-                    ctxM.beginPath(); ctxM.moveTo(w*0.1, h/2); ctxM.lineTo(w*0.9, h/2); ctxM.stroke();
-                    ctxM.beginPath(); ctxM.moveTo(w/2, h*0.1); ctxM.lineTo(w/2, h*0.9); ctxM.stroke();
+                    // FULL SCREEN AXIS
+                    ctxM.strokeStyle = "rgba(255,255,255,0.4)"; ctxM.lineWidth = 1;
+                    ctxM.beginPath(); ctxM.moveTo(0, h/2); ctxM.lineTo(w, h/2); ctxM.stroke();
+                    ctxM.beginPath(); ctxM.moveTo(w/2, 0); ctxM.lineTo(w/2, h); ctxM.stroke();
                     
-                    // HEART LINE
-                    ctxM.strokeStyle = "#fff"; ctxM.lineWidth = 4; ctxM.shadowBlur = 20; ctxM.shadowColor = "#fff";
+                    // SOLID HEART
+                    ctxM.strokeStyle = "#fff"; ctxM.lineWidth = 5; ctxM.shadowBlur = 0; // Solid Edge
                     ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y);
                     heartPts.forEach(p => ctxM.lineTo(p.x, p.y)); ctxM.stroke();
-                    t += 0.012; requestAnimationFrame(drawH);
+                    t += 0.01; requestAnimationFrame(drawH);
                 } else {
                     let a = 0;
                     const fill = setInterval(() => {
-                        a += 0.01; ctxM.fillStyle = `rgba(255,255,255,${a})`;
+                        a += 0.015; ctxM.fillStyle = `rgba(255,255,255,${a})`;
                         ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y);
                         heartPts.forEach(p => ctxM.lineTo(p.x, p.y)); ctxM.fill();
-                        if(a >= 0.7) { clearInterval(fill); document.getElementById('jump-btn-wrapper').style.display = 'block'; }
+                        if(a >= 0.85) { clearInterval(fill); document.getElementById('jump-btn-wrapper').style.display = 'block'; }
                     }, 30);
                 }
             };
@@ -206,18 +199,52 @@
 
         function startWarp() {
             document.getElementById('jump-btn-wrapper').style.display = 'none';
-            for(let i=0; i<400; i++) celestials.push(new Celestial());
-            stage = "warp";
-            main.style.transition = "opacity 2s"; main.style.opacity = "0";
-            setTimeout(() => {
-                const f = document.getElementById('flash');
-                f.style.opacity = '1'; f.style.transition = 'none';
-                setTimeout(() => {
-                    stage = "final"; f.style.opacity = '0'; f.style.transition = 'opacity 5s';
-                    const mc = document.getElementById('final-msg-container');
-                    mc.style.display = 'block'; setTimeout(() => mc.style.opacity = '1', 100);
-                }, 100);
-            }, 8500);
+            for(let i=0; i<350; i++) celestials.push(new Celestial());
+            
+            // Door Opening Effect
+            const openDoor = () => {
+                heartOpenFactor += 15;
+                ctxM.clearRect(0,0,w,h);
+                ctxM.save();
+                
+                // Left Half
+                ctxM.save();
+                ctxM.translate(-heartOpenFactor, 0);
+                ctxM.beginPath(); ctxM.rect(0, 0, w/2, h); ctxM.clip();
+                drawHeartToM();
+                ctxM.restore();
+
+                // Right Half
+                ctxM.save();
+                ctxM.translate(heartOpenFactor, 0);
+                ctxM.beginPath(); ctxM.rect(w/2, 0, w/2, h); ctxM.clip();
+                drawHeartToM();
+                ctxM.restore();
+                
+                ctxM.restore();
+
+                if(heartOpenFactor < w/2 + 200) {
+                    requestAnimationFrame(openDoor);
+                } else {
+                    stage = "warp";
+                    setTimeout(() => {
+                        const f = document.getElementById('flash');
+                        f.style.opacity = '1';
+                        setTimeout(() => {
+                            stage = "final"; f.style.opacity = '0'; f.style.transition = 'opacity 4s';
+                            document.getElementById('final-msg-container').style.display = 'block';
+                            setTimeout(() => document.getElementById('final-msg-container').style.opacity = '1', 100);
+                        }, 150);
+                    }, 8000);
+                }
+            };
+            openDoor();
+        }
+
+        function drawHeartToM() {
+            ctxM.fillStyle = "#fff";
+            ctxM.beginPath(); ctxM.moveTo(heartPts[0].x, heartPts[0].y);
+            heartPts.forEach(p => ctxM.lineTo(p.x, p.y)); ctxM.fill();
         }
     </script>
 </body>
