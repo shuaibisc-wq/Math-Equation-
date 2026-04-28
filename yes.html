@@ -5,78 +5,50 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Forever Story | Prova</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,400&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
         body, html { 
-            width: 100%; height: 100%; overflow: hidden; 
-            background: #ffcccc; /* Black এর বদলে Pinkish ব্যাকগ্রাউন্ড যাতে লোডিং টাইমেও সুন্দর লাগে */
-            display: flex; flex-direction: column; justify-content: center; align-items: center;
+            margin: 0; padding: 0; width: 100%; height: 100%; overflow: hidden;
+            background-color: #ffb6c1; /* লোড হওয়ার আগে হালকা পিঙ্ক */
+            display: flex; justify-content: center; align-items: center;
         }
 
-        /* GIF BACKGROUND - FIXING VISIBILITY */
         #bg-gif {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             object-fit: cover; z-index: -2;
-            display: block; opacity: 1; /* Opacity বাড়িয়ে দিলাম */
+            background: url('cinderella-dance.gif') no-repeat center center;
+            background-size: cover;
         }
 
-        /* DARK TINT FOR TEXT READABILITY */
         .overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); 
-            z-index: -1;
-            pointer-events: none; /* যাতে টাচ করলে ক্লিক আটক না যায় */
-        }
-
-        #story-container {
-            width: 85%; text-align: center; z-index: 10;
-            pointer-events: none; /* Text এর উপর ক্লিক করলেও যেন মেসেজ পাল্টায় */
+            background: rgba(0, 0, 0, 0.35); z-index: -1;
         }
 
         #message-p { 
-            font-family: 'Great Vibes', cursive; font-size: 4rem; 
-            color: #fff; text-shadow: 0 0 25px #ff007f, 0 0 50px #ff007f; 
-            min-height: 160px; transition: opacity 0.6s ease;
-            line-height: 1.3;
+            font-family: 'Great Vibes', cursive; font-size: 3.5rem; 
+            color: #fff; text-shadow: 0 0 20px #ff007f; text-align: center;
+            padding: 20px; z-index: 10; pointer-events: none;
         }
 
         #next-btn {
-            position: fixed; bottom: 50px; 
-            background: none; border: none;
-            color: #fff; font-family: 'Crimson Text', serif;
-            font-style: italic; font-size: 2.2rem; cursor: pointer;
-            text-shadow: 0 0 15px #fff, 0 0 30px #ff007f;
-            animation: pulseGlow 1.5s infinite alternate;
-            z-index: 100; letter-spacing: 3px;
-            pointer-events: none; /* পুরো বডিতে ক্লিক করলে কাজ করবে তাই এটা এখন শুধু দেখানোর জন্য */
+            position: fixed; bottom: 40px; color: #fff; font-size: 1.5rem;
+            text-shadow: 0 0 10px #ff007f; animation: pulse 1.5s infinite;
+            background: none; border: none; font-style: italic;
         }
 
-        @keyframes pulseGlow {
-            from { opacity: 0.6; transform: scale(1); }
-            to { opacity: 1; transform: scale(1.1); }
-        }
-
-        @media (max-width: 600px) {
-            #message-p { font-size: 2.8rem; }
-            #next-btn { font-size: 1.8rem; }
-        }
+        @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
     </style>
 </head>
 <body onclick="showNextMessage()">
 
     <audio id="starboy" src="starboy.mp3" autoplay loop></audio>
 
-    <img id="bg-gif" src="cinderella-dance.gif" alt="Background">
+    <div id="bg-gif"></div>
     <div class="overlay"></div>
 
-    <div id="story-container">
-        <p id="message-p">Yes! My love, Yes! ❤️</p>
-    </div>
-
-    <button id="next-btn">Tap anywhere to unveil my heart...</button>
+    <p id="message-p">Yes! My love, Yes! ❤️</p>
+    <button id="next-btn">Tap anywhere to hear me...</button>
 
     <script>
         const messages = [
@@ -90,21 +62,17 @@
         ];
 
         let currentMessage = 0;
-        const messageP = document.getElementById('message-p');
-        const nextBtn = document.getElementById('next-btn');
-
         function showNextMessage() {
             currentMessage++;
             if (currentMessage < messages.length) {
-                messageP.style.opacity = 0;
-                
+                const p = document.getElementById('message-p');
+                p.style.opacity = 0;
                 setTimeout(() => {
-                    messageP.innerText = messages[currentMessage];
-                    messageP.style.opacity = 1;
-                }, 600);
-
+                    p.innerText = messages[currentMessage];
+                    p.style.opacity = 1;
+                }, 400);
                 if(currentMessage === messages.length - 1) {
-                    nextBtn.style.display = 'none';
+                    document.getElementById('next-btn').style.display = 'none';
                 }
             }
         }
