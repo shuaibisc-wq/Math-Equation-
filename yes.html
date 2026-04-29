@@ -5,72 +5,76 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Forever Story | Prova</title>
     <style>
+        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,400&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-
+        /* পুরো স্ক্রিন জুড়ে GIF রাখার সেটআপ */
         body, html { 
-            width: 100%; height: 100%; overflow: hidden; 
-            background: #ffb6c1; /* Fallback color */
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            overflow: hidden; background-color: #000;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
+            cursor: pointer;
         }
 
-        /* GIF Background - Absolute position */
-        #bg-gif {
-            position: absolute; top: 0; left: 0;
+        /* GIF টা এখন গোল হবে না, পুরো স্ক্রিন জুড়ে থাকবে */
+        #princess-dance { 
+            position: fixed;
+            top: 0; left: 0;
             width: 100%; height: 100%;
-            object-fit: cover; z-index: -2;
-            display: block;
+            object-fit: cover; /* এটি স্ক্রিন অনুযায়ী GIF কে ফিট করবে */
+            z-index: -2; /* লেখাগুলোর নিচে থাকবে */
         }
 
-        .overlay {
-            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.45); z-index: -1;
+        /* টেক্সট পড়ার সুবিধার জন্য হালকা কালো আভা */
+        #overlay {
+            position: fixed;
+            top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.4); 
+            z-index: -1;
         }
 
         #story-container {
-            width: 90%; text-align: center; z-index: 10; pointer-events: none;
+            width: 90%; text-align: center; z-index: 10;
         }
 
         #message-p { 
             font-family: 'Great Vibes', cursive; font-size: 3.5rem; 
-            color: #fff; text-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f; 
-            min-height: 150px; transition: opacity 0.5s;
-            line-height: 1.2;
+            color: #fff; /* সাদার ওপর পিঙ্ক গ্লো */
+            text-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f; 
+            min-height: 120px; transition: opacity 0.8s;
         }
 
-        #next-btn {
-            position: fixed; bottom: 40px; 
-            background: none; border: none;
-            color: #fff; font-family: 'Times New Roman', serif;
+        #instruction {
+            position: fixed; bottom: 30px; font-family: 'Crimson Text', serif;
             font-style: italic; font-size: 1.5rem; letter-spacing: 2px;
-            text-shadow: 0 0 15px #ff007f;
-            animation: pulse 1.5s infinite;
+            color: #fff; text-shadow: 0 0 10px #ff007f;
+            animation: breathe 2s infinite alternate;
         }
 
-        @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        @media (max-width: 600px) { #message-p { font-size: 2.5rem; } }
+        @keyframes breathe {
+            from { opacity: 0.3; transform: scale(0.95); }
+            to { opacity: 1; transform: scale(1.05); }
+        }
     </style>
 </head>
-<body onclick="handleInteraction()">
+<body onclick="showNextMessage()">
 
-    <audio id="starboy" src="starboy.mp3" preload="auto" loop></audio>
+    <audio id="starboy" src="starboy.mp3" loop></audio>
 
-    <img id="bg-gif" src="cinderella-dance.gif" onerror="this.style.display='none'; document.body.style.background='#ff007f';">
-    
-    <div class="overlay"></div>
+    <img id="princess-dance" src="cinderella-dance.gif" alt="Cinderella Dance"> 
+    <div id="overlay"></div>
 
     <div id="story-container">
         <p id="message-p">Yes! My love, Yes! ❤️</p>
     </div>
 
-    <button id="next-btn">Tap anywhere to hear my heart...</button>
+    <div id="instruction">Tap anywhere to hear my heart...</div>
 
     <script>
         const messages = [
             "Yes! My love, Yes! ❤️",
-            "Prova, you've made me the happiest person!",
+            "Prova, you've made me the happiest person in the world!",
             "I promise to fill every day with fairytales...",
             "You are my princess, and I am your starboy.",
             "In every universe, I'd still choose you.",
@@ -79,30 +83,27 @@
         ];
 
         let currentMessage = 0;
-        let audioStarted = false;
-        const song = document.getElementById('starboy');
         const messageP = document.getElementById('message-p');
+        const instruction = document.getElementById('instruction');
+        const song = document.getElementById('starboy');
 
-        function handleInteraction() {
-            // Audio Play Logic
-            if (!audioStarted) {
-                song.currentTime = 26; // Starboy catchy part
-                song.play().then(() => {
-                    audioStarted = true;
-                }).catch(e => console.log("Click again to play sound"));
+        function showNextMessage() {
+            // প্রথম ক্লিকেই গান ২৬ সেকেন্ড থেকে শুরু হবে
+            if (song.paused) {
+                song.currentTime = 26; 
+                song.play().catch(e => console.log("Audio play blocked by browser"));
             }
 
-            // Message Change Logic
             currentMessage++;
             if (currentMessage < messages.length) {
-                messageP.style.opacity = 0;
+                messageP.style.opacity = 0; 
                 setTimeout(() => {
                     messageP.innerText = messages[currentMessage];
-                    messageP.style.opacity = 1;
-                }, 400);
+                    messageP.style.opacity = 1; 
+                }, 500);
 
                 if(currentMessage === messages.length - 1) {
-                    document.getElementById('next-btn').style.display = 'none';
+                    instruction.style.display = 'none';
                 }
             }
         }
