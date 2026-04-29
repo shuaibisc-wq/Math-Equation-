@@ -8,64 +8,54 @@
         @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,400&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
-        /* পুরো স্ক্রিন জুড়ে GIF রাখার সেটআপ */
         body, html { 
-            margin: 0; padding: 0; height: 100%; width: 100%;
-            overflow: hidden; background-color: #000;
+            margin: 0; padding: 0; background-color: #ffcccc; color: #fff; 
+            font-family: 'Crimson Text', serif; height: 100%; overflow: hidden; 
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer;
-        }
-
-        /* GIF টা এখন গোল হবে না, পুরো স্ক্রিন জুড়ে থাকবে */
-        #princess-dance { 
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover; /* এটি স্ক্রিন অনুযায়ী GIF কে ফিট করবে */
-            z-index: -2; /* লেখাগুলোর নিচে থাকবে */
-        }
-
-        /* টেক্সট পড়ার সুবিধার জন্য হালকা কালো আভা */
-        #overlay {
-            position: fixed;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); 
-            z-index: -1;
+            cursor: pointer; /* Screen-e click korar jonno pointer */
         }
 
         #story-container {
-            width: 90%; text-align: center; z-index: 10;
+            width: 90%; text-align: center; display: flex; flex-direction: column; 
+            justify-content: center; align-items: center; position: relative;
+        }
+
+        #princess-dance { 
+            width: 100%; max-width: 500px; border-radius: 50%; 
+            box-shadow: 0 0 60px rgba(255,255,255,0.8); margin-bottom: 40px;
+            border: 5px solid #fff;
         }
 
         #message-p { 
-            font-family: 'Great Vibes', cursive; font-size: 3.5rem; 
-            color: #fff; /* সাদার ওপর পিঙ্ক গ্লো */
-            text-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f; 
-            min-height: 120px; transition: opacity 0.8s;
+            font-family: 'Great Vibes', cursive; font-size: 3.8rem; 
+            color: #ff007f; text-shadow: 0 0 20px rgba(255,255,255,0.9); 
+            min-height: 100px; transition: opacity 1s;
         }
 
+        /* The Glowing Instruction */
         #instruction {
             position: fixed; bottom: 30px; font-family: 'Crimson Text', serif;
-            font-style: italic; font-size: 1.5rem; letter-spacing: 2px;
+            font-style: italic; font-size: 1.2rem; letter-spacing: 3px;
             color: #fff; text-shadow: 0 0 10px #ff007f;
             animation: breathe 2s infinite alternate;
+            opacity: 0.8;
         }
 
         @keyframes breathe {
             from { opacity: 0.3; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1.05); }
         }
+
+        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
 <body onclick="showNextMessage()">
 
-    <audio id="starboy" src="starboy.mp3" loop></audio>
-
-    <img id="princess-dance" src="cinderella-dance.gif" alt="Cinderella Dance"> 
-    <div id="overlay"></div>
+    <audio id="starboy" src="starboy.mp3" autoplay loop></audio>
 
     <div id="story-container">
+        <img id="princess-dance" src="cinderella-dance.gif" alt="Cinderella Dance"> 
+
         <p id="message-p">Yes! My love, Yes! ❤️</p>
     </div>
 
@@ -79,29 +69,23 @@
             "You are my princess, and I am your starboy.",
             "In every universe, I'd still choose you.",
             "Forever isn't enough to love you. 🥺",
-            "Together forever... always yours, Shuaib."
+            "Together forever... always yours."
         ];
 
         let currentMessage = 0;
         const messageP = document.getElementById('message-p');
         const instruction = document.getElementById('instruction');
-        const song = document.getElementById('starboy');
 
         function showNextMessage() {
-            // প্রথম ক্লিকেই গান ২৬ সেকেন্ড থেকে শুরু হবে
-            if (song.paused) {
-                song.currentTime = 26; 
-                song.play().catch(e => console.log("Audio play blocked by browser"));
-            }
-
             currentMessage++;
             if (currentMessage < messages.length) {
-                messageP.style.opacity = 0; 
+                messageP.style.opacity = 0; // Fade out effect
                 setTimeout(() => {
                     messageP.innerText = messages[currentMessage];
-                    messageP.style.opacity = 1; 
+                    messageP.style.opacity = 1; // Fade in effect
                 }, 500);
 
+                // Last message-er por instruction hide kora
                 if(currentMessage === messages.length - 1) {
                     instruction.style.display = 'none';
                 }
@@ -110,3 +94,5 @@
     </script>
 </body>
 </html>
+
+
