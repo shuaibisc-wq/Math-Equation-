@@ -5,70 +5,60 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Our Forever Story | Prova</title>
     <style>
-        @import url('https://fonts.googleapis.com/css2?family=Crimson+Text:ital,wght@1,400&display=swap');
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
         * { margin: 0; padding: 0; box-sizing: border-box; }
 
         body, html { 
             width: 100%; height: 100%; overflow: hidden; 
-            background-color: #ffb6c1; 
+            background: #ffb6c1; /* Fallback color */
             display: flex; flex-direction: column; justify-content: center; align-items: center;
         }
 
+        /* GIF Background - Absolute position */
         #bg-gif {
-            position: fixed; top: 50%; left: 50%;
-            min-width: 100%; min-height: 100%;
-            width: auto; height: auto; z-index: -2;
-            transform: translate(-50%, -50%);
-            object-fit: cover; display: block;
+            position: absolute; top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; z-index: -2;
+            display: block;
         }
 
         .overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.4); z-index: -1;
-            pointer-events: none;
+            position: absolute; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.45); z-index: -1;
         }
 
         #story-container {
-            width: 85%; text-align: center; z-index: 10;
-            pointer-events: none;
+            width: 90%; text-align: center; z-index: 10; pointer-events: none;
         }
 
         #message-p { 
             font-family: 'Great Vibes', cursive; font-size: 3.5rem; 
             color: #fff; text-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f; 
-            min-height: 160px; transition: opacity 0.5s ease;
-            line-height: 1.3;
+            min-height: 150px; transition: opacity 0.5s;
+            line-height: 1.2;
         }
 
         #next-btn {
-            position: fixed; bottom: 50px; 
+            position: fixed; bottom: 40px; 
             background: none; border: none;
-            color: #fff; font-family: 'Crimson Text', serif;
-            font-style: italic; font-size: 1.8rem; cursor: pointer;
+            color: #fff; font-family: 'Times New Roman', serif;
+            font-style: italic; font-size: 1.5rem; letter-spacing: 2px;
             text-shadow: 0 0 15px #ff007f;
-            animation: pulseGlow 1.5s infinite alternate;
-            z-index: 100; letter-spacing: 2px;
-            pointer-events: none;
+            animation: pulse 1.5s infinite;
         }
 
-        @keyframes pulseGlow {
-            from { opacity: 0.6; transform: scale(1); }
-            to { opacity: 1; transform: scale(1.05); }
-        }
+        @keyframes pulse { 0% { opacity: 0.5; } 100% { opacity: 1; } }
 
-        @media (max-width: 600px) {
-            #message-p { font-size: 2.5rem; }
-            #next-btn { font-size: 1.3rem; }
-        }
+        @media (max-width: 600px) { #message-p { font-size: 2.5rem; } }
     </style>
 </head>
-<body onclick="showNextMessage()">
+<body onclick="handleInteraction()">
 
     <audio id="starboy" src="starboy.mp3" preload="auto" loop></audio>
 
-    <img id="bg-gif" src="cinderella-dance.gif" alt="Background">
+    <img id="bg-gif" src="cinderella-dance.gif" onerror="this.style.display='none'; document.body.style.background='#ff007f';">
+    
     <div class="overlay"></div>
 
     <div id="story-container">
@@ -89,20 +79,20 @@
         ];
 
         let currentMessage = 0;
+        let audioStarted = false;
         const song = document.getElementById('starboy');
         const messageP = document.getElementById('message-p');
-        const nextBtn = document.getElementById('next-btn');
 
-        // Gaaner key moment-er time (seconds-e)
-        const keyMoment = 26; 
-
-        function showNextMessage() {
-            // First interaction-e gaan shuru hobe
-            if (song.paused) {
-                song.currentTime = keyMoment; // 26 second point theke shuru hobe
-                song.play().catch(e => console.log("Waiting for user tap..."));
+        function handleInteraction() {
+            // Audio Play Logic
+            if (!audioStarted) {
+                song.currentTime = 26; // Starboy catchy part
+                song.play().then(() => {
+                    audioStarted = true;
+                }).catch(e => console.log("Click again to play sound"));
             }
 
+            // Message Change Logic
             currentMessage++;
             if (currentMessage < messages.length) {
                 messageP.style.opacity = 0;
@@ -112,7 +102,7 @@
                 }, 400);
 
                 if(currentMessage === messages.length - 1) {
-                    nextBtn.style.display = 'none';
+                    document.getElementById('next-btn').style.display = 'none';
                 }
             }
         }
