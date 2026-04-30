@@ -9,53 +9,54 @@
         @import url('https://fonts.googleapis.com/css2?family=Great+Vibes&display=swap');
 
         body, html { 
-            margin: 0; padding: 0; background-color: #ffcccc; color: #fff; 
-            font-family: 'Crimson Text', serif; height: 100%; overflow: hidden; 
+            margin: 0; padding: 0; height: 100%; width: 100%;
+            overflow: hidden; background-color: #ffcccc;
             display: flex; flex-direction: column; justify-content: center; align-items: center;
-            cursor: pointer; /* Screen-e click korar jonno pointer */
+            cursor: pointer;
         }
 
-        #story-container {
-            width: 90%; text-align: center; display: flex; flex-direction: column; 
-            justify-content: center; align-items: center; position: relative;
-        }
-
+        /* GIF Full Screen Fix for Samsung */
         #princess-dance { 
-            width: 100%; max-width: 500px; border-radius: 50%; 
-            box-shadow: 0 0 60px rgba(255,255,255,0.8); margin-bottom: 40px;
-            border: 5px solid #fff;
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            object-fit: cover; z-index: -2;
         }
+
+        #overlay {
+            position: fixed; top: 0; left: 0;
+            width: 100%; height: 100%;
+            background: rgba(0, 0, 0, 0.3); z-index: -1;
+        }
+
+        #story-container { width: 90%; text-align: center; z-index: 10; }
 
         #message-p { 
-            font-family: 'Great Vibes', cursive; font-size: 3.8rem; 
-            color: #ff007f; text-shadow: 0 0 20px rgba(255,255,255,0.9); 
-            min-height: 100px; transition: opacity 1s;
+            font-family: 'Great Vibes', cursive; font-size: 3.2rem; 
+            color: #fff; text-shadow: 0 0 20px #ff007f, 0 0 40px #ff007f; 
+            min-height: 120px; transition: opacity 0.5s;
         }
 
-        /* The Glowing Instruction */
         #instruction {
             position: fixed; bottom: 30px; font-family: 'Crimson Text', serif;
-            font-style: italic; font-size: 1.2rem; letter-spacing: 3px;
+            font-style: italic; font-size: 1.3rem; letter-spacing: 2px;
             color: #fff; text-shadow: 0 0 10px #ff007f;
             animation: breathe 2s infinite alternate;
-            opacity: 0.8;
         }
 
         @keyframes breathe {
             from { opacity: 0.3; transform: scale(0.95); }
             to { opacity: 1; transform: scale(1.05); }
         }
-
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
     </style>
 </head>
-<body onclick="showNextMessage()">
+<body onclick="playEverything()">
 
-    <audio id="starboy" src="starboy.mp3" autoplay loop></audio>
+    <audio id="starboy" src="starboy.mp3" preload="auto" loop></audio>
+
+    <img id="princess-dance" src="cinderella-dance.gif" alt="Cinderella Dance"> 
+    <div id="overlay"></div>
 
     <div id="story-container">
-        <img id="princess-dance" src="cinderella-dance.gif" alt="Cinderella Dance"> 
-
         <p id="message-p">Yes! My love, Yes! ❤️</p>
     </div>
 
@@ -64,28 +65,37 @@
     <script>
         const messages = [
             "Yes! My love, Yes! ❤️",
-            "Prova, you've made me the happiest person in the world!",
+            "Prova, you've made me the happiest person!",
             "I promise to fill every day with fairytales...",
             "You are my princess, and I am your starboy.",
             "In every universe, I'd still choose you.",
             "Forever isn't enough to love you. 🥺",
-            "Together forever... always yours."
+            "Together forever... always yours, Shuaib."
         ];
 
         let currentMessage = 0;
+        let isStarted = false;
         const messageP = document.getElementById('message-p');
         const instruction = document.getElementById('instruction');
+        const song = document.getElementById('starboy');
 
-        function showNextMessage() {
+        function playEverything() {
+            // Samsung/Android Force Play Logic
+            if (!isStarted) {
+                song.currentTime = 26; // Start from key moment
+                song.play();
+                isStarted = true;
+            }
+
+            // Message changing logic
             currentMessage++;
             if (currentMessage < messages.length) {
-                messageP.style.opacity = 0; // Fade out effect
+                messageP.style.opacity = 0; 
                 setTimeout(() => {
                     messageP.innerText = messages[currentMessage];
-                    messageP.style.opacity = 1; // Fade in effect
-                }, 500);
+                    messageP.style.opacity = 1; 
+                }, 400);
 
-                // Last message-er por instruction hide kora
                 if(currentMessage === messages.length - 1) {
                     instruction.style.display = 'none';
                 }
@@ -94,5 +104,3 @@
     </script>
 </body>
 </html>
-
-
